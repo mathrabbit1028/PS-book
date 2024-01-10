@@ -1,0 +1,129 @@
+트리는 연결 그래프 중 가장 적은 간선으로 이루어진 그래프이기 떄문에 연결 그래프 $G=(V, E)$에서 $E^\prime \subset E$이고 $T=(V, E^\prime)$가 트리를 이루는 $T$가 무한히 많이 존재한다. 이번 장에서는 가중치가 주어졌을 때 $E^\prime$을 이루는 간선의 가중치 합이 가장 작은 $T$를 찾는 문제인 최소 스패닝 트리 문제를 다룬다.
+
+\section{최소 스패닝 트리}
+서두에서도 간단히 언급했지만, 가중치가 있는 연결 그래프에서 일부 간선을 제거하여 만든 트리인 스패닝 트리 중에서 간선 가중치의 합이 가장 작은 트리를 최소 스패닝 트리라고 한다. 이번 절에서 다룰 문제는 like-linear한 시간에 최소 스패닝 트리를 찾는 것이다.
+
+\begin{example}
+    그래프 $G = (E, V)$가 주어질 때, 이 그래프 $G$의 스패닝 트리 중 가장 간선 가중치가 작은 스패닝 트리(최소 스패닝 트리) $T$의 간선 가중치 합을 출력하라.
+\end{example}
+
+이 문제는 그리디 기반으로 해결할 수 있으며, 두 가지 알고리즘을 소개한다.
+
+\section{Kruskal 알고리즘}
+가장 가중치가 작은 간선부터 보면서 추가하거나 추가하지 않는 방식으로 그리디를 사용한다. 추가하는 경우는 연결했을 때 트리가 유지되는 경우(사이클이 생기지 않는 경우)이고, 추가하지 않는 경우는 연결했을 때 트리가 깨지는 경우이다. 증명은 일반적인 그리디의 증명 방법과 유사하게 할 수 있다.
+
+\begin{proof}
+    위 방법대로 선택되지 않은 최소 스패닝 트리가 존재한다고 가정하자. 그 스패닝 트리에는 $u$와 $v$를 잇는 가중치 $w$인 간선이 골라지지 않고, 트리 상에서 $u$와 $v$를 잇는 경로 중 가중치가 $w$보다 큰 간선이 존재할 것이다. 그 간선을 $u$와 $v$를 연결하는 간선으로 바꾸어도 여전히 트리이기 때문에 처음의 트리가 MST라는 가정에 모순이다.
+\end{proof}
+
+그렇다면 추가해도 트리가 유지되는지는 어떻게 판단할까? 연결해도 트리가 유지되려면, 사이클이 생가면 안되므로 간선의 양쪽 정점이 같은 컴포넌트에 속하지 않으면 된다. 이는 분리 집합을 이용해 쉽게 판단할 수 있다. 매번 간선을 연결할 때마다 양 끝점에 union 연산을 하면 쉽게 판단할 수 있을 것이다.
+간선의 가중치에 따라 저장해야 하기 때문에 인접행렬 또는 인접리스트 저장 방식보다 간선을 배열로 저장하는 것이 더 유용하다. 구현 코드는 \Cref{code: Kruskal}을 참고하라. \texttt{Union} 함수와 \texttt{Find} 함수는 코드에서 생략하였다.
+
+\begin{code} \label{code: Kruskal}
+Kruskal 알고리즘으로 MST를 찾는 코드 (분리집합 구현 코드는 생략)
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, m, ans = 0;
+
+struct edge{
+    int u, v, w;
+};
+vector<edge> edges;
+bool compare(edge a, edge b) {
+    return a.w < b.w;
+}
+
+// Find and Union function
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        edges.push_back({u, v, w});
+    }
+    sort(edges.begin(), edges.end(), compare);
+
+    int cnt = 0;
+    for (int i = 0; i < m; i++) {
+        if (Find(edges[i].u) == Find(edges[i].v)) continue;
+        else {
+            Union(edges[i].u, edges[i].v);
+            cnt++;
+            ans += edges[i].w;
+        }
+    }
+    //ans is answer
+}
+\end{lstlisting}
+\end{code}
+
+시간복잡도는 정렬이 지배하므로 $O(E \log E)$이다.
+
+\section{Prim 알고리즘}
+Kruskal 알고리즘이 간선을 기준으로 했다면 Prim 알고리즘은 정점을 기준으로 한다. 새로운 정점을 적절한 간선으로 추가하는 방식으로 그리디를 이어나간다.
+기본적으로 Kruskal 알고리즘과 동치가 되어야 하므로 이미 선택된 정점끼리는 연결하지 않고, 이미 선택된 정점과 아직 선택되지 않은 정점 사이에서 가장 가중치가 작은 것을 고른다. 결과적으로 만들어지는 트리는 연결 그래프이기 떄문에 이렇게 고르더라도 Kruskal 알고리즘과 고르는 순서만 다를 뿐 골라지는 간선은 같음을 쉽게 증명할 수 있다.
+(증명과 구현 추가)
+
+\section{연습문제 A}
+\begin{problem}
+    최소 스패닝 트리로 가능한 것 하나를 출력하는 프로그램을 작성하라.
+\end{problem}
+\begin{problem}
+    최소 스패닝 트리로 가능한 것이 하나인지, 여러 개인지 판별하는 프로그램을 작성하라.
+\end{problem}
+\begin{problem}
+    $N$개의 수로 이루어진 수열 $A_i$가 주어진다. 여러분은 $i$번 정점과 $j$번 정점을 비용 $\gcd(A_{i+1}, A_{i+2}, \cdots, A_j)$로 연결할 수 있다. $1$번부터 $N$번까지의 정점이 포함된 그래프 $G$를 연결 그래프로 만들기 위해 필요한 최소 비용을 $O(N^2)$의 시간복잡도로 구하는 프로그램을 작성하라. 단, $\gcd$는 최대공약수 함수이다.
+\end{problem}
+
+\section{연습문제 B}
+
+\subsection{기초문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1197} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/4343} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/4386} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/9134} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18769} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20010} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/24010} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/25545} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27009} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/28019} \end{problem}
+
+\subsection{응용문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1396} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/3900} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7788} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10335} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/12667} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/14574} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18919} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20263} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23108} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23736} \end{problem}
+
+\subsection{도전문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/4203} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5257} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/8527} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11592} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/12668} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/14828} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16074} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17582} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18482} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18963} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19251} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19852} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20086} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20503} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/24953} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/24961} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/25121} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27071} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27877} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/28002} \end{problem}

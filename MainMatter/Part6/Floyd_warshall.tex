@@ -1,0 +1,124 @@
+마지막 최단경로 알고리즘은 임의의 두 정점 $u$와 $v$ 사이의 거리를 모두 구하는 문제인 전체-전체 최단경로 문제를 해결하는 플로이드-워셜 알고리즘이다. 물론 단일-잔체 최단경로를 $N$번 사용할 수 있지만, 플로이드-워셜 알고리즘은 그것보다 빠르다. 이번 장에서는 플로이드-워셜 알고리즘을 배울 것이다.
+
+\section{문제 정의}
+다음과 같은 최단경로 문제를 생각하자.
+
+\begin{example} \label{ex: Floyd-Warshall}
+    모든 \textbf{가중치가 양수}인 한 그래프에서 \textbf{임의의 두 정점} $u$와 $v$ 사이의 거리를 모두 저장한 거리 행렬을 구하는 프로그램을 작성하라.
+\end{example}
+
+이러한 문제를 전체-전체 최단경로 문제라고 부른다. 시작 정점도 모든 정점이고, 도착 정점도 모든 정점이기 때문이다.
+이런 문제는 가중치가 양수라는 조건 하에서 플로이드-워셜 알고리즘으로 해결할 수 있다. 꽤 특이한 아이디어를 사용하고, 이러한 아이디어는 때때로 사용되기도 하니 꼭 숙지하도록 하자.
+
+\section{플로이드-워셜 알고리즘}
+거리 행렬의 $i$행 $j$열 성분, 즉 $i$번 정점에서 $j$번 정점까지의 최단거리를 $d_ij$라고 놓자. 초깃값은 직접 연결하는 간선이 있으면 그 간선의 가중치이고, 없으면 무한대이며, $i=j$이면 $d_ij=0$이다.
+핵심 아이디어는 $i$번 정점에서 $j$번 정점으로 가는 경로는 모든 $k$애 대해 $k$번 정점을 거치는 경로의 최단거리의 최솟값이라는 것이다. 다른 말로 하면 $d_ij \leftarrow d_ik + d_kj$의 상태전이를 사용한다.
+
+문제는 $d_ik$와 $d_kj$가 최솟값임이 보장되어야 $d_ij$가 제대로 계산될 수 있다는 것이다. 이를 보장하기 위해서는 $i, j, k$에 대한 삼중 반복문을 쓸 때 제일 상위 반복문을 $k$에 대해 반복하면 된다.
+이러한 접근이 가능한 이유는 최초의 $d_ij$ 경로에서 $1$번 정점부터 $N$번 정점까지 순서대로 경로에 포함시켰을 떄 최적이 되는지 파악하기 때문이다. 동적계획법과 비슷하게 수학적 귀납법 기반으로 진행된다고 이해하면 쉽다.
+
+시간복잡도는 $O(N^3)$으로, 단일-전체 최단경로를 $N$번 시행했을 때 시간복잡도인 $O(N^3 \log N)$보다 빠르다. 구현 코드는 \Cref{code: Floyd-Warshall}을 참고하라.
+
+\begin{code} \label{code: Floyd-Warshall}   
+플로이드-워셜 알고리즘 구현 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, m;
+int dis[1010][1010]
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) for (int j = 1; j <= n; j++) dis[i][j] = 1e9;
+    for (int i = 1; i <= n; i++) dis[i][i] = 0;
+    for (int i = 1; i <= m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        dis[u][v] = w;
+        dis[v][u] = w;
+    }
+    
+    for (int k = 1; k <= n; k++) {
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
+                dis[i][j] = min(dis[i][j], dis[i][k] + dis[k][j]);
+            }
+        }
+    }
+    //dis is answer
+}
+\end{lstlisting}
+\end{code}
+
+\section{연습문제 A}
+\begin{problem}
+    플로이드-워셜 알고리즘에서, 임의의 $i, j, k$ 반복문 순서를 사용하더라도 똑같은 코드를 세 번 반복하면 답이 구해짐이 보장된다. 이를 증명하라.
+\end{problem}
+\begin{problem}
+    \Cref{code: Floyd-Warshall}에서 경로를 역추적하는 코드를 추가하라.
+\end{problem}
+
+\section{연습문제 B}
+
+\subsection{기초문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/11403} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11404} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1389} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2458} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1956} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/14938} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2660} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10159} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1058} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1613} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11780} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1507} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1719} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2617} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2610} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11562} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17182} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13424} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11265} \end{problem}
+
+\subsection{응용문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1602} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/3349} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/4142} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/4603} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6430} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7141} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7143} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7768} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/8877} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/9502} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13141} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15526} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15843} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16617} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18264} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19648} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20445} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23258} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/24617} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27116} \end{problem}
+
+\subsection{도전문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/2125} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7577} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/9669} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10518} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13009} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15308} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15826} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16662} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17516} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17681} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21006} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23171} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23493} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27425} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/29765} \end{problem}

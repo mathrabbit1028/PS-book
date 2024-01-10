@@ -1,0 +1,200 @@
+그래프 탐색은 그래프의 정보를 바탕으로 그래프의 모든 정점을 탐색하는 것을 말한다. 기본적으로는 모든 정점을 한 번씩 빠짐없이 탐색하는 것을 기본으로 하지만, 이 탐색 방법의 특징을 이용해 문제을 해결하는 경우도 있기 때문에 꼭 알아두어야 할 것이다. 이 장에서는 대표적인 그래프 탐색 방식인 깊이 우선 탐색과 너비 우선 탐색을 배운다.
+
+\section{깊이 우선 탐색}
+깊이 우선 탐색(DFS)은 이름에서도 알 수 있듯이 시작 정점으로부터 점점 더 깊어지는(멀어지는) 방향으로 탐색하는 방식이다. \Cref{ex: DFS}에서 이 방식을 정확히 설명하고 있다.
+\begin{example} \label{ex: DFS}
+    그래프 $G = (V, E)$의 정점 수와 간선이 주어질 때, 1번 정점을 시작 정점으로 하여 다음과 같은 방식으로 탐색한 경로를 출력하는 프로그램을 작성하라.
+    \begin{itemize}
+        \item 제일 처음 시작(1번) 정점을 방문한다.
+        \item 만약 연결된 간선 중 방문하지 않은 정점이 있다면 아무 것이나 방문하고 탐색 경로에 방문한 정점을 추가한다.
+        \item 만약 연결딘 간선 중 방문하지 않은 점점이 없다면 바로 직전에 방문했던 정점에서 다시 이 과정을 수행한다.
+    \end{itemize}
+\end{example}
+
+위 방식대로 재귀함수로 구현하면 쉽게 구현할 수 있다. \Cref{code: DFS}은 \Cref{ex: DFS}를 연결리스트 방식으로 구현한 코드이다.
+\begin{code} \label{code: DFS}
+연결리스트 기반 DFS 구현 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, m;
+vector<int> adj[101010];
+
+int visited[101010];
+vector<int> path;
+void DFS(int v) {
+    path.push_back(v);
+    for (int i = 0; i < adj[v].size(); i++) {
+        int u = adj[v][i];
+        if (visited[u] == 0) {
+            visited[u] = 1;
+            DFS(u);
+        }
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    DFS(1);
+    //path is answer
+}
+\end{lstlisting}
+\end{code}
+
+그래프 탐색은 모든 점에 방문하는 것 자체로 사용되는 경우가 많기 때문에 구현이 간단한 DFS가 자주 사용된다. 
+하지만 DFS로 알아낼 수 있는 것이 없는 것은 아니다. DFS를 사용하면 시작 정점을 포함하는 컴포넌트를 파악할 수 있다. 왜냐하면 연결된 모든 정점을 도달해보기 떄문이다.
+
+\section{너비 우선 탐색}
+너비 우선 탐색(BFS)는 깊이 우선 탐색과 다르게 시작 정점으로부터 멀어지는 방향이 아니라 거리가 최대한 가까운 것부터 탐색하는 방식이다. \Cref{ex: BFS}에서 이 방식을 정확히 설명하고 있다.
+\begin{example} \label{ex: BFS}
+    그래프 $G = (V, E)$의 정점 수와 간선이 주어질 때, 1번 정점을 시작 정점으로 하여 다음과 같은 방식으로 탐색한 경로를 출력하는 프로그램을 작성하라.
+    \begin{itemize}
+        \item 이 과정은 방문 대기열을 따라 이루어진다. 제일 처음 시작(1번) 정점을 방문 대기열에 추가한다. 이후 방문 대기열의 순서대로 정점을 본다.
+        \item 만약 연결된 간선 중 방문하지 않은 정점이 있다면 그 정점들을 모두 방문 대기열에 추가한다.
+        \item 만약 연결딘 간선 중 방문하지 않은 점점이 없다면 방문 대기열을 따라 다음 정점으로 이동한다.
+    \end{itemize}
+\end{example}
+
+방문 대기열의 처리는 동적 배열에 포인터를 쓰거나 정적 배열에 두 개의 포인터를 사용해도 구현할 수 있으나, 큐 자료구조를 사용하면 쉽게 구현할 수 있다. \Cref{code: BFS}은 \Cref{ex: BFS}를 연결리스트 방식으로 구현한 코드이다.
+\begin{code} \label{code: BFS}
+연결리스트 기반 BFS 구현 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, m;
+vector<int> adj[101010];
+
+int visited[101010];
+queue<int> q;
+vector<int> path;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    q.push(1);
+    visited[1] = 1;
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
+        path.push_back(v);
+        for (int i = 0; i < adj[v].size(); i++) {
+            int u = adj[v][i];
+            if (visited[u] == 0) {
+                visited[u] = 1;
+                q.push(u);
+            }
+        }
+    }
+    // path is answer
+}
+\end{lstlisting}
+\end{code}
+
+BFS는 DFS보다는 조금 더 복잡하지만 가장 거리가 가까운 정점부터t 방문하기 때문에 최단거리를 구할 수 있다는 장점이 있다(가중치가 없는 경우에). 이 외에는 거의 사용되지 않을 것이다.
+구현도 매우 간단한데, 큐에 새로운 정점 $u$를 넣기 전에 \texttt{dis[u] = dis[v] + 1}를 이용해 거리를 구하면 된다. 이미 \texttt{dis[v]}가 최단거리이기 떄문에 수학적 귀납법에 의해 구해진 \texttt{dis[u]}도 최단거리가 된다.
+
+\section{0-1 BFS}
+BFS는 간선의 가중치가 있으면 사용될 수 없는 방법이다. 하지만 특수하게 간선의 가중치가 0이거나 모두 같은 수라면 BFS를 활용하여 최단거리를 구할 수 있다.
+기본적인 아이디어는 가중치가 있는 경우 최단거리를 구할 때 다시 설명하겠지만 현재까지 최단거리가 구해진 정점 중 가장 거리가 짧은 정점으로부터 거리를 구하면 최단거리가 유지된다는 것이다.
+이를 바탕으로 생각해보면, 거리가 0인 간선을 통해 도달한 정점의 경우에는 여전히 현재까지 있는 정점 중 가장 짧은 거리에 있는 정점이므로 방문 대기열의 제일 앞에 넣고, 거리가 1인 간선을 통해 도달한 정점의 경우에는 현재까지 거리가 구해진 정점 중 가장 먼 거리에 있는 정점이므로 방문 대기열의 제일 끝에 넣겠다는 아이디어가 성립한다.
+덱은 이러한 연산을 지원하므로 덱을 사용하면 가중치가 0 또는 1인 가중치가 있는 그래프의 최단거리를 구해낼 수 있다.
+
+\section{연습문제 A}
+\begin{problem}
+    인접행렬 기반 DFS 구현과 BFS 구현의 시간복잡도를 논의하라.
+\end{problem}
+\begin{problem}
+    DFS와 BFS에서 \texttt{visited} 배열을 사용하지 않으면 실행 결과가 어떻게 될지 생각해보라.
+\end{problem}
+\begin{problem}
+    \Cref{ex: DFS}와 \Cref{ex: BFS}에서 연결된 간선 중 방문하지 않은 정점이 있다면 가장 번호가 작은 정점을 방문하게 한다면 코드를 어떻게 수정해야 할지 생각해보자.
+\end{problem}
+\begin{problem}
+    BFS를 통해 최단 경로의 길이 뿐만 아니라 최단 경로도 구하는 코드를 작성하라.
+\end{problem}
+\begin{problem}
+    BFS에서 $k$개의 정점 $v_1, v_2, \cdots, v_k$와 임의의 정점 $u$에 대해 $v_i$와 $u$ 사이 거리의 최솟값을 찾는 코드를 작성하라.
+\end{problem}
+\begin{problem}
+    가중치 값이 0 또는 1이라고 가정하고, 입력 코드부터 0-1 BFS를 바탕으로 최단거리를 찾는 코드까지 작성하라.
+\end{problem}
+
+\section{연습문제 B}
+
+\subsection{기초문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1012} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1260} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1261} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2668} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/3255} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5925} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6166} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7569} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11967} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13078} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13549} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16397} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17244} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20419} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/22352} \end{problem}
+
+\subsection{응용문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1981} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2424} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5507} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10094} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/14599} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15019} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15514} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15730} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16835} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18251} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21935} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/25718} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/26051} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27602} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/28104} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/28143} \end{problem}
+
+\subsection{도전문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/10483} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10743} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10955} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11742} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/12343} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13088} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13949} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13963} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16663} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17385} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17667} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18929} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19012} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20349} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20657} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21085} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21346} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21799} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23052} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23164} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/24902} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27867} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/28686} \end{problem}

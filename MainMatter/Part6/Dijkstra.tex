@@ -1,0 +1,199 @@
+이번 장부터는 그래프 알고리즘의 꽃인 최단거리 알고리즘을 다룰 것이다. 특히, BFS 알고리즘으로 해결할 수 없었던 일반적인 가중치가 있는 그래프에서 최단거리 알고리즘에 대해 논의할 것이다. 첫 번쨰 알고리즘은 첫 번째는 양의 가중치에서 단일-전체 최단경로 문제를 해결할 수 있는 다익스트라 알고리즘이다.
+
+\section{문제 정의}
+다음과 같은 최단경로 문제를 생각하자.
+
+\begin{example} \label{ex: Dijkstra}
+    모든 \textbf{가중치가 양수}인 그래프에서 \textbf{1번 정점}에서 시작할 때 각 정점까지의 최단거리를 모두 구하는 프로그램을 작성하라.
+\end{example}
+
+이러한 문제를 단일-전체 최단경로 문제라고 부른다. 시작 정점이 정해지고, 그 정점으로부터 모든 정점까지의 거리를 구해야 하기 때문이다.
+이런 문제는 가중치가 양수라는 조건 하에서 다익스트라 알고리즘으로 해결할 수 있다. 왜 가중치가 양수여야 하는지는 알고리즘 설명 이후 다시 설명하겠다.
+
+\section{다익스트라 알고리즘}
+다익스트라 알고리즘의 기본 아이디어는 BFS에서 사용했던 방법을 확장하여 점화관계를 바탕으로 동적계획법을 사용하는 것이다. 그 전에 다음과 같은 관찰이 필요하다.
+
+\begin{obs}
+    $u$에서 $v$로 가는 어떤 경로가 최단거리라면, 그 경로상의 한 점 $x$에 대해 $u$에서 $x$까지 가는 부분 나열과 $x$에서 $v$로 가는 부분 나열 모두 최단거리이다.
+\end{obs}
+
+따라서 최단거리가 보장된 정점부터 점화식을 이용해 거리를 계산해나가면 위 관찰에 의해 계산된 모든 거리가 최단거리이다. 그렇다면 최단거리가 보장된 정점은 어떤 정점일까?
+모든 간선의 가중치가 양수이기 때문이 현재까지 방문하지 않은 점들 중 가장 출발점과의 거리가 짧은 점은 최단거리가 보장된 정점이다.
+
+이제 이 알고리즘을 $O(N^2)$으로 naive하게 구현한 후 $O(N \log M)$으로 최적화할 것이다.
+
+\subsection{$O(N^2)$ 구현}
+$O(N^2)$ 구현은 매우 쉽게 할 수 있다. 매번 출발점과의 거리를 확인하여 $O(N)$의 시간에 봐야 할 정점을 구하는 과정을 $O(N)$번 반복하면 되기 때문이다. 구현 코드는 \Cref{code: Dijkstra-naive}를 참고하라.
+
+\begin{code} \label{code: Dijkstra-naive}
+$O(N^2)$ 다익스트라 알고리즘 구현 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, m;
+vector<pii> adj[101010];
+
+int visited[101010], dis[101010];
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        adj[u].push_back({v, w});
+        adj[v].push_back({u, w});
+    }
+    
+    for (int i = 1; i <= n; i++) dis[i] = 1e9; //inf
+    dis[1] = 0;
+    
+    while (1) {
+        int v = -1, _min = 1e9;
+        for (int i = 1; i <= n; i++) {
+            if (visited[i] == 0 && _min > dis[i]) {
+                _min = dis[i];
+                v = i;
+            }
+        }
+        if (v == -1) break;
+        visited[v] = 1;
+        for (int i = 0; i < adj[v].size(); i++) {
+            int u = adj[v][i].first, w = adj[v][i].second;
+            dis[u] = min(dis[u], adj[v] + w);
+        }
+    }
+}
+\end{lstlisting}
+\end{code}
+
+\subsection{$O(M \log M)$ 구현}
+\Cref{code: Dijkstra-naive}의 시간복잡도를 엄밀히 쓰면 $O(N^2+M)$일 것이다. $O(N^2)$은 거리가 가장 짧은 정점을 찾는 시간복잡도이고, $O(M)$은 점화식을 통해 거리를 구하는 과정의 시간복잡도이다.
+이 알고리즘을 $O(M \log M)$으로 줄이려면 거라가 가장 짧은 정점을 like-constant한 시간에 찾아야 한다. 이를 위한 대표적인 자료구조가 힙(heap)이다.
+
+힙 구조를 사용하기 위해 힙에 현재 계산된 출발점으로부터의 거리와 정점 번호를 쌍으로 묶어 넣고, 거리를 기준으로 정렬하자. 이제 힙에 가장 꼭대기에 있는 거리와 정점 번호 $(d, v)$를 받자. 이제 다음 과정에 따라 $(d, v)$를 처리하면 된다.
+
+\begin{itemize}
+    \item $v$를 이미 처리한 적 있는 경우: 넘어간다.
+    \item $d$가 현재 저장된 출발점과 $v$ 사이의 거리가 아닌 경우: 업데이트 이전에 heap에 들어간 정보이므로 넘어간다.
+    \item 나머지 경우: $v$와 연결된 정점에 점화관계를 통해 거리를 갱신하고, 거리가 갱신된 경우에 한해 heap에 $(d + w, u)$ 쌍을 넣는다.
+\end{itemize}
+
+\Cref{code: Dijkstra-heap}은 이 과정을 구현한 코드이다.
+\begin{code} \label{code: Dijkstra-heap}
+$O(M \log M)$ 다익스트라 구현 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+typedef pair<int, int> pii;
+
+int n, m;
+vector<pii> adj[101010];
+
+int visited[101010], dis[101010];
+priority_queue<pii> pq;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        adj[u].push_back({v, w});
+        adj[v].push_back({u, w});
+    }
+    
+    for (int i = 1; i <= n; i++) dis[i] = 1e9; //inf
+    dis[1] = 0;
+
+    pq.push({-dis[1], 1});
+    
+    while (!pq.empty()) {
+        int v = pq.top().second, d = -pq.top().first;
+        if (visited[v] == 1) continue;
+        if (dis[v] < d) continue;
+        visited[v] = 1;
+        for (int i = 0; i < adj[v].size(); i++) {
+            int u = adj[v][i].first, w = adj[v][i].second;
+            if (d + w < dis[u]) {
+                dis[u] = d + w;
+                pq.push({-dis[u], u});
+            }
+        }
+    }
+}
+\end{lstlisting}
+\end{code}
+
+시간복잡도는 어떻게 될까? 점화식을 통해 거리를 업데이트하는 횟수는 $O(M)$으로 같고, while문은 많아야 $2M$번 실행되기 때문에 시간복잡도는 $O(M \log M)$이 된다.
+
+\section{연습문제 A}
+\begin{problem}
+    만약 가중치가 음수일 수 있다면 최단거리가 항상 존재하는가? 이에 대해 논의하라.
+\end{problem}
+\begin{problem}
+    \Cref{code: Dijkstra-naive}와 \Cref{code: Dijkstra-heap}에서 최단거리를 역추적하는 코드를 작성하라.
+\end{problem}
+\begin{problem}
+    두 번쨰 최단거리를 구하는 $O(M \log M)$ 코드를 작성하라. 일반적으로 $K$번째 최단거리를 알아야 한다면 어떻게 구현해야 하는가? 시간복잡도는 어떻게 되는가?
+\end{problem}
+
+\section{연습문제 B}
+
+\subsection{기초문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1162} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1238} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1504} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1753} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1800} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1916} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2211} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5972} \end{problem}
+
+\subsection{응용문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1848} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1854} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1857} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2325} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5529} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5542} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5719} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5822} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/9446} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10217} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/12930} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13308} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13907} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/14611} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15264} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15556} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16763} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18262} \end{problem}
+
+\subsection{도전문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/2765} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7138} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/8236} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10120} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10847} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/12752} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13145} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15004} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15208} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15292} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16312} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16606} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17719} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18253} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19335} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19378} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19616} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19928} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20536} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21731} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21787} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21847} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23461} \end{problem}

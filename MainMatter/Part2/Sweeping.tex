@@ -1,0 +1,111 @@
+스위핑(sweeping)은 "쓸다"를 의미하는 단어 "sweep"에서 파생된 단어로, 한 방향으로 지나가면서 문제에 대한 해답을 구하는 알고리즘을 말한다. 다른 말로 특정 기준에 따라 정렬된 순서를 따라 값을 처리하면서 정렬되어 있다는 특성을 활용하여 문제를 해결하는 방법이다. 이러한 스위핑 알고리즘은 다양한 문제에서 다양한 방식으로 활용된다. 이번 장에서는 예제를 통해 스위핑 알고리즘의 사용 방법을 배운다.
+
+\section{선분 길이 구하기}
+다음 문제 \Cref{ex: sweeping}(\url{https://www.acmicpc.net/problem/2170})을 보자.
+\begin{example} \label{ex: sweeping}
+    $N$개의 선분의 시작점과 끝점이 주어질 때, 선이 그려진 지점의 총 길이를 구하는 프로그램을 작성하라. 단, 선이 여러 번 그려진 곳도 하나로 센다.
+\end{example}
+
+이 문제는 대표적인 스위핑 문제이다. 먼저 다음과 같은 관찰을 하자.
+
+\begin{obs}
+    선이 그려진 지점은 몇 개의 선분으로 표현되고, 그 선분의 양 끝점은 원래 선분의 양 끝점들 중 하나이다.
+\end{obs}
+
+두 선분이 겹쳐져 있으면 그 두 선분의 공통 범위는 가장 앞 시작점과 가장 뒤 끝점이 된다는 사실로부터 간단히 증명할 수 있다. 또한, 이 증명으로부터 현재까지 선이 그려진 지점을 저장해놓고 선분을 추가하면서 갱신하겠다는 아이디어를 낼 수 있다.
+
+그렇다면 어떤 순서로 선분을 추가해야 할까? 정답은 선분의 시작점이 오름차순으로 증가하는 순서이다. 왜냐하면 이렇게 순서를 정해야 이전까지 그려진 선들 중 가장 오른쪽에 있는 선분만 고려해도 되기 때문이다. 이를 증명하기 위해 이전까지 나온 선분들 중 가장 오른쪽 선분을 $(l, r)$이라고 하자. 두 가지 경우가 가능하다.
+\begin{itemize}
+    \item 현재 선분 $(s, e)$가 $s>r$인 경우에는 가장 오른쪽 선분을 $(s, e)$로 바꾸면 된다. 이 이후에 나오는 선분은 시작점이 $s$ 오른쪽이기 때문에 절대로 $(l, r)$과 겹칠 수 없기 때문이다.
+    \item 현재 선분 $(s, e)$가 $s<=r$인 경우에는 가장 오른쪽 선분을 $(l, \max(r, e))$로 바꾸면 된다. 겹치기 때문에 합쳐진 선분도 연속한 하나의 선분으로 표현될 수 있기 때문이다.
+\end{itemize}
+
+이 과정을 $N$개의 선분에 대해 시행하게 되면 $O(N)$의 시간에 겹치는 구간을 모두 구할 수 있다. 구현은 다음 코드 \Cref{code: sweeping}을 참고하라.
+\begin{code} \label{code: sweeping}
+\Cref{ex: sweeping}의 정답 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, ans = 0, l, r;
+pair<int, int> arr[1010101];
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> arr[i].first >> arr[i].second;
+    sort(arr + 1, arr + n + 1);
+    
+    l = arr[1].first; r = arr[1].second;
+    for (int i = 2; i <= n; i++) {
+        if (r <= arr[i].first) {
+            ans += r - l;
+            l = arr[i].first; r = arr[i].second;
+        }
+        else r = max(r, arr[i].second);
+    }
+    ans += r - l;
+    cout << ans << "\n";
+    return 0;
+}
+\end{lstlisting}
+\end{code}
+
+\section{연습문제 A}
+\begin{problem}
+    \Cref{code: sweeping}의 8, 9번째 줄에 적힌 코드가 무엇인지 조사해보라. 그리고 8, 9번째 코드를 빼고 2170번 문제에 제출해보자. 어떻게 되는가?
+\end{problem}
+\begin{problem}
+    \Cref{ex: sweeping}을 풀 때, 끝 점 기준으로 정렬해도 스위핑이 가능한가? 가능한 방법이 있다면 찾고 코드로 구현하라.
+\end{problem}
+
+\section{연습문제 B}
+
+\subsection{기초문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/2594} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/3845} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5874} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11182} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15889} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21041} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/22643} \end{problem}
+
+\subsection{응용문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1118} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1319} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1617} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2130} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2397} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2836} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/4438} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5541} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6529} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6818} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10107} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15922} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17166} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19584} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23740} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/25174} \end{problem}
+
+\subsection{도전문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1218} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1266} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2017} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6117} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/12771} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16809} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17159} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17196} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17625} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17692} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17739} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17973} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18279} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18579} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20306} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/23197} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/25415} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27235} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27290} \end{problem}

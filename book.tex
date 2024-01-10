@@ -1,0 +1,65 @@
+\documentclass[openright, twoside, british]{book}
+
+\usepackage[utf8]{inputenc}
+\usepackage{kotex}
+\usepackage{ptmt}
+
+\title{Fundamentals of Problem Solving}
+\author{Mingeon Jeong \and Donghyun Gu}
+\date{\today}
+
+\begin{document}
+
+% Front matter section.
+\frontmatter
+
+% Include the title page, which is located in the FrontMatter subfolder.
+\include{./FrontMatter/titlepage}
+
+% Create the book's title page.
+\maketitle\pagebreak
+
+\tableofcontents
+
+\mainmatter
+
+\part{서론}
+\include{./MainMatter/Part1/Part1}
+
+\part{기본 알고리즘}
+\include{./MainMatter/Part2/Part2}
+
+\part{자료구조 (Easy)}
+\include{./MainMatter/Part3/Part3}
+
+\part{동적계획법 (Easy)}
+\include{./MainMatter/Part4/Part4}
+
+\part{그리디}
+\include{./MainMatter/Part5/Part5}
+
+\part{그래프 이론}
+\include{./MainMatter/Part6/Part6}
+
+\part{트리 알고리즘}
+\include{./MainMatter/Part7/Part7}
+
+\part{자료구조 (Hard)} \label{part: 8}
+\include{./MainMatter/Part8/Part8}
+
+\part{동적계획법 (Hard)}
+\include{./MainMatter/Part9/Part9}
+    
+\part{문자열}
+\include{./MainMatter/Part10/Part10}
+
+\part{기하}
+\include{./MainMatter/Part11/Part11}
+
+\part{네트워크 플로우}
+\include{./MainMatter/Part12/Part12}
+
+\part{수학}
+\include{./MainMatter/Part13/Part13}
+
+\end{document}

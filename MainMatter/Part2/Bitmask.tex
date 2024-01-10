@@ -1,0 +1,156 @@
+\section{배열 대신 숫자 하나로}
+크기 $N$의 \texttt{bool}형 배열을 처리해야 하는 상황을 생각해보자. 물론 배열 자체로도 임의 인덱스에 접근할 수 있기 때문에 충분히 효율적이지만 배열로 사용하는 것에는 한계가 있다. 함수에 배열을 넘기는 것은 추가 작업이 필요하고, 배열은 인덱스나 값 비교에 쉽게 사용될 수 없다. 이러한 문제를 해결할 수 있는 방법이 비트마스크이다.
+\texttt{bool}형 배열의 $i$번째(0-based) 수를 2진법으로 나타내었을 떄 $2^i$ 자리수로 대응시킨 숫자를 생각하자. 그러면 이 숫자는 $2^N$보다 작은 음 아닌 정수가 될 것이다. 코딩에서 배열보다는 숫자가 훨씬 다루기 편하다는 점에서 비트마스킹은 큰 이점을 갖는다.
+
+이제 \texttt{bool}형 배열과 숫자 사이의 전환을 해주는 코드를 살펴보자. \Cref{code: bitmask}을 보라.
+
+\begin{code} \label{code: bitmask}
+비트마스크 함수
+\begin{lstlisting}
+int boolToNum(int n, bool *arr) {
+    int ret = 0;
+    for (int i = 0; i < n; i++) {
+        if (arr[i]) ret += (1<<i);
+    }
+    return ret;
+}
+
+bool numToBool(int x, int k) {
+    return (bool)(x & (1<<k));
+}
+
+int setToOne(int x, int k) {
+    return x | (1<<k);
+}
+
+int setToZero(int x, int k) {
+    return x & (1<<k);
+}
+\end{lstlisting}
+\end{code}
+
+\Cref{code: bitmask}의 네 함수는 각각 다음 역할을 한다:
+\begin{itemize}
+    \item \texttt{boolToNum(n, arr)}: 길이 $n$의 \texttt{bool}형 배열을 $i$번째 값을 $2^i$자리수로 가지는 숫자로 변경
+    \item \texttt{numToBool(x, k)}: 비트를 나타내는 수 $x$에서 $k$번째 비트 값 반환
+    \item \texttt{setToOne(x, k)}: 비트를 나타내는 수 $x$에서 $k$번째 비트 값을 $1$로 변경
+    \item \texttt{setToZero(x, k)}: 비트를 나타내는 수 $x$에서 $k$번째 비트 값을 $0$으로 변경
+\end{itemize}
+
+이 과정에서 비트 쉬프트, 비트 AND, 비트 OR, 비트 XOR 등의 비트 연산을 사용하는 것이 유용하다. 특히, $2^k$의 경우에는 \texttt{1<<k}로 간단하게 표현할 수 있음을 상기하자. 또한 비트 연산은 매우 빠르기 때문에 비트 연산을 사용하는 것이 프로그램의 수행 시간을 줄이는데 도움이 된다.
+
+비트마스크는 주로 $N$개 각각을 선택하거나 선택하지 않은 상태를 쉽게 표현하기 위해 사용된다. 백트래킹으로 쉽게 해결할 수 있는 크기 $N$의 집합의 모든 부분집합을 출력하는 문제를 생각해보자. 백트레킹으로 풀 떄에는 레벨을 나타내는 변수 $L$을 현재 보는 원소의 인덱스로 잡고 재귀함수를 구현해야 한다. 하지만 비트마스킹을 쓰면 단순히 $i=0$부터 $i=2^N-1$까지의 모든 수에 대한 반복으로 쉽게 모든 부분집합을 출력할 수 있다(\Cref{pb: bitmask-subset}).
+
+\section{\texttt{std::bitset}}
+STD에서는 \texttt{bitset}이라고 불리는 비트를 저장하는 특별한 컨테이너(container)를 지원한다. \texttt{bitset}의 맴버 함수(member function)으로는 \texttt{all, any, none, flip, set, reset} 등이 있다. 예시 사용법은 \Cref{code: std-bitset}를 참고하라.
+
+\begin{code} \label{code: std-bitset}
+\url{https://en.cppreference.com/w/cpp/utility/bitset}
+\begin{lstlisting}
+#include <bitset>
+#include <cassert>
+#include <cstddef>
+#include <iostream>
+ 
+int main()
+{
+    typedef std::size_t length_t, position_t; // the hints
+ 
+    // constructors:
+    constexpr std::bitset<4> b1;
+    constexpr std::bitset<4> b2{0xA}; // == 0B1010
+    std::bitset<4> b3{"0011"}; // can also be constexpr since C++23
+    std::bitset<8> b4{"ABBA", length_t(4), /*0:*/'A', /*1:*/'B'}; // == 0B0000'0110
+ 
+    // bitsets can be printed out to a stream:
+    std::cout << "b1:" << b1 << "; b2:" << b2 << "; b3:" << b3 << "; b4:" << b4 << '\n';
+ 
+    // bitset supports bitwise operations:
+    b3 |= 0b0100; assert(b3 == 0b0111);
+    b3 &= 0b0011; assert(b3 == 0b0011);
+    b3 ^= std::bitset<4>{0b1100}; assert(b3 == 0b1111);
+ 
+    // operations on the whole set:
+    b3.reset(); assert(b3 == 0);
+    b3.set(); assert(b3 == 0b1111);
+    assert(b3.all() && b3.any() && !b3.none());
+    b3.flip(); assert(b3 == 0);
+ 
+    // operations on individual bits:
+    b3.set(position_t(1), true); assert(b3 == 0b0010);
+    b3.set(position_t(1), false); assert(b3 == 0);
+    b3.flip(position_t(2)); assert(b3 == 0b0100);
+    b3.reset(position_t(2)); assert(b3 == 0);
+ 
+    // subscript operator[] is supported:
+    b3[2] = true; assert(true == b3[2]);
+ 
+    // other operations:
+    assert(b3.count() == 1);
+    assert(b3.size() == 4);
+    assert(b3.to_ullong() == 0b0100ULL);
+    assert(b3.to_string() == "0100");
+}
+\end{lstlisting}
+\end{code}
+
+\section{연습문제 A}
+\begin{problem}
+    \Cref{code: bitmask}의 \texttt{BoolToNum(n, arr)}은 나머지 세 종류의 함수로 구현할 수 있다. \texttt{BoolToNum(n, arr)}를 나머지 세 종류의 함수로 구현하는 프로그램을 작성하라.
+\end{problem}
+\begin{problem}
+    아래 함수 \texttt{setToOne, setToZero}에는 문제가 있다. 무엇이 문제인지 설명하라.
+\begin{lstlisting}
+int setToOne(int x, int k) {
+    return x + (1<<k);
+}
+int setToZero(int x, int k) {
+    return x - (1<<k);
+}
+\end{lstlisting}
+\end{problem}
+\begin{problem} \label{pb: bitmask-subset}
+    비트마스크를 이용해 크기 $N$의 집합의 모든 부분집합을 출력하는 코드를 직성하라.
+\end{problem}
+
+\section{연습문제 B}
+
+\subsection{기초문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/2082} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/8544} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10594} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/12833} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/16551} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/26512} \end{problem}
+
+\subsection{응용문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1044} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1062} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1887} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2064} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6989} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/8903} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/9527} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/15936} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18177} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/25152} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/25970} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/26180} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/28142} \end{problem}
+
+\subsection{도전문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/2833} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/4207} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13169} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17458} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/17752} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18717} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/18913} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19674} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/20242} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21768} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21860} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/21915} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/24068} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27511} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27906} \end{problem}

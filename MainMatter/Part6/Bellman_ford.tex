@@ -1,0 +1,109 @@
+다익스트라 알고리즘은 가중치가 음수인 경우의 문제를 해결할 수 없다는 문제가 있다. 이번 장에서는 음의 가중치가 있어도 단일-전체 최단경로 문제를 해결할 수 있는 벨만-포드 알고리즘을 배울 것이다.
+
+\section{문제 정의}
+다음과 같은 최단경로 문제를 생각하자.
+
+\begin{example} \label{ex: Bellman-Ford}
+    \textbf{가중치가 음수일 수 있는} 그래프에서 가중치 합이 음수인 사이클이 있는지 판단하고, 없다면 \textbf{1번 정점}에서 시작할 때 각 정점까지의 최단거리를 모두 구하는 프로그램을 작성하라.
+\end{example}
+
+가중치가 음수이기 때문에 가중치 합이 음수인 사이클이 존재할 수 있다. 만약 그런 사이클에 도달할 수 있다면 그 사이클을 계속 순환하면 거리가 작아지기 때문에 최단거리가 존재하지 않게 된다. 따라서 음의 가중치가 있는 경우의 단일-전체 최단경로 문제는 가중치 합이 음수인 사이클 존재 여부 판별이 우선되어야 한다.
+벨만-포드 알고리즘을 이용하면 좀 더 일반적인 단일-전체 최단경로 문제를 해결할 수 있다.
+
+\section{벨만-포드 알고리즘}
+다음과 같은 관찰을 기반으로 한다.
+
+\begin{obs}
+    가중치 합이 음수인 사이클이 없다면 각 간선이 $N$번 이상으로 사용되는 최단경로는 존재할 수 없다. 만약 그렇다면 경로 상에 같은 정점이 여러 번 등장할 수 밖에 없고, 이는 가중지 합이 음수인 사이클의 존재를 나타내기 때문이다.
+\end{obs}
+
+이제 우리는 모든 정점에 대해 인접한 정점까지 거리를 점화식으로 계산하면 된다. 이 과정의 횟수가 $N$번으로 제한되므로 $O(NM)$에 문제를 해결할 수 있다. \Cref{code: Bellman-Ford}는 구현 코드이다.
+
+\begin{code} \label{code: Bellman-Ford}
+벨만-포드 알고리즘 구현 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+typedef pair<int, int> pii;
+
+int n, m;
+vector<pii> adj[101010];
+
+int dis[101010];
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        adj[u].push_back({v, w});
+        adj[v].push_back({u, w});
+    }
+    
+    for (int i = 1; i <= n; i++) dis[i] = 1e9;
+    dis[1] = 0;
+    for (int i = 1; i <= n; i++) {
+        for (int v = 1; v <= n; v++) {
+            for (int j = 0; j < adj[v].size(); j++) {
+                int u = adj[v][j].first, w = adj[v][j].second;
+                if (i == n && dis[u] > dis[v] + w) {
+                    // there is a nagative cycle
+                    return 1;
+                }
+                dis[u] = min(dis[u], dis[v] + w);
+            }
+        }
+    }
+    // there is not any nagative cycle
+    // dis is answer
+}
+\end{lstlisting}
+\end{code}
+
+\section{연습문제 A}
+\begin{problem}
+    \Cref{code: Bellman-Ford}에서 경로를 역추적하는 코드를 추가하라.
+\end{problem}
+\begin{problem}
+    가중치 값이 제약이 없는 그래프에서 1번 정점에서 시작할 때 최장 경로를 존재하는지 판별하고 구하는 프로그램을 작성하라.
+\end{problem}
+
+\section{연습문제 B}
+
+\subsection{기초문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1738} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/1865} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6002} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6817} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/10360} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11463} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/11657} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13317} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/26019} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/30221} \end{problem}
+
+\subsection{응용문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/1219} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/2081} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/3680} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/3860} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/4324} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/5942} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6141} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7040} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7141} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7144} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7145} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7634} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/13271} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/22522} \end{problem}
+
+\subsection{도전문제}
+\begin{problem} \url{https://www.acmicpc.net/problem/4109} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/6297} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/7332} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19153} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/19330} \end{problem}
+\begin{problem} \url{https://www.acmicpc.net/problem/27400} \end{problem}
