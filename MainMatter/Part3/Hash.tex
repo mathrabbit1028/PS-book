@@ -1,0 +1,122 @@
+해시는 임의의 길이를 갖는 데이터를 고정된 길이의 데이터로 매핑하는 함수를 활용하여 데이터를 저장하는 방식이다. 해시는 충돌이 발생할 수 있지만, 상수 시간에 주어진 데이터와 일치하는 데이터를 찾을 수 있다는 특징이 있다. 이번 장에서는 해시의 장점과 특징을 알아보고, 어떤 문제에 적합한지 알아볼 것이다.
+
+
+\section{해시}
+해시의 기본적인 아이디어는, 입력되는 값이 너무 크거나 문자열과 같아 인덱스로 사용할 수 없을 때, 작은 수로 바꾸어 그 값을 인덱스로 사용하는 것이다. 물론, 이것은 결국 원래의 값과 같은 값을 찾기 위함이므로 값이 다르면 바뀐 수도 최대한 다르게 만들어야 한다. 이때 작은 수로 바꾸는 함수를 해시 함수, 바뀐 값을 해시값이라고 부르고, 바뀐 값이 같아 발생하는 문제를 해시 충돌이라고 한다.
+
+PS에서 해시를 사용할 경우는 극히 드물다. 대부분의 경우 \texttt{std::map}을 사용해도 충분하기 때문이다. 딕셔너리와 같은 기능을 할 수 있으면서, 키가 정렬되어 있어 안정적으로 $O(\log N)$의 시간에 연산을 처리할 수 있다는 장점을 사용하는 것이다. 그런데, 때때로 $O(\log N)$이 더 곱해지는 것이 시간초과의 원인인 경우가 있다. $N$이 10만 가까이 될 경우, 상수가 큰 $O(N \log^2 N)$은 꽤나 빡빡하고, $O(N^{1.5} \log N)$은 시간 안에 실행되기 어렵다. PS에서 해시는 이러한 문제를 해결하기 위한 최후의 수단에 가깝다. 키를 바탕으로 한 이분탐색과 같은 정렬 상태가 필요하지 않고, 단순 딕셔너리와 같은 대응 기능만이 필요한 경우, 해시를 사용하여 $O(1)$의 시간에 값을 가져올 수 있다. 물론, 해시는 안정적이지 않다. 실제로 시간복잡도를 amortized $O(1)$과 같이 표기하는데, 어떤 한 번의 연산에서는 $O(1)$보다 훨씬 큰 $O(N)$ 가량의 시간이 요구될 수 있으나, $N$번 정도의 충분한 시행이 있으면 평균 시간복잡도가 $O(1)$이라는 뜻이다.
+
+이제 STL에서 지원하는 해시 자료구조를 보겠다. 이진 탐색 트리와 마찬가지로, set과 map의 두 가지 형태로 지원한다. 
+
+첫번째는 정렬되지 않은 집합으로, \texttt{unordered\_set}이라고 한다(진정한 집합이다). 집합이므로 \textbf{같은 수의 추가는 무시}된다. \url{https://en.cppreference.com/w/cpp/container/unordered_set}에 가면 어떤 함수를 지원하고 어떻게 사용하는지, 시간복잡도까지 모두 확인할 수 있다. 다음은 대표적으로 사용되는 함수들이다.
+
+\begin{itemize}
+    \item \texttt{begin()}를 통해 제일 앞의 노드를 가리키는 포인터를 참조할 수 있다.
+    \item \texttt{end()}를 통해 제일 뒤의 노드의 \textbf{다음 노드}를 가리키는 포인터를 참조할 수 있다.
+    \item \texttt{insert(T)}를 통해 데이터를 추가할 수 있다.
+    \item \texttt{erase(T)}를 통해 주어진 값에 해당하는 노드를 제거할 수 있다.
+    \item \texttt{erase(iterator)}를 통해 포인터(iterator)가 가리키는 노드를 제거할 수 있다.
+    \item \texttt{count(T)}를 통해 주어진 데이터의 개수를 셀 수 있다. \texttt{unordered\_set}에서는 당연히 $0$ 또는 $1$이다.
+    \item \texttt{find(T)}를 통해 주어진 데이터의 존재 여부를 판단할 수 있다. 반환형은 \texttt{bool}형 변수이다.
+    \item \texttt{empty()}를 통해 비어있는지 여부를 확인할 수 있다.
+    \item \texttt{size()}를 통해 저장된 데이터의 개수를 확인할 수 있다.
+    \item \texttt{clear()}를 통해 모든 데이터를 지울 수 있다.
+\end{itemize}
+
+참고로, 대부분의 함수는 amortized $O(1)$에 실행되며, \texttt{[]}를 통해 \textbf{랜덤 엑세스가 불가능}하다. 또, 같은 수의 추가를 고려하고 싶다면, \texttt{unordered\_set} 대신에 \texttt{unordered\_multiset}을 사용하면 된다. \texttt{erase(T)}에서 주어진 값에 해당하는 노드가 \textbf{모두 제거된다}는 사실을 제외하면 주요 함수의 사용법은 동일하다.
+
+우선순위 큐와 마찬가지로 정의 방식에 대해서도 알 필요가 있다. \texttt{unordered\_set<T, Hash, ...>}로 정의하는데, 각각은 다음을 나타낸다:
+
+\begin{itemize}
+    \item \texttt{T}: 데이터의 자료형이다.
+    \item \texttt{Hash}: 데이터에 대한 해시 함수이다. STL에서 지원하는 해시 함수가 존재하는 경우 자동으로 지정된다. 직접 해시 함수를 만들어야 할 경우, \url{https://en.cppreference.com/w/cpp/utility/hash}의 예시를 참고하라.
+    \item \texttt{...}: 뒤의 추가 인자는 몰라도 된다.
+\end{itemize}
+
+정의 방식은 \texttt{unordered\_multiset}에서도 같다.
+
+두 번째는, \texttt{unordered\_map}이다. key-value 쌍으로 값이 저장되고, key가 정렬된 순서로 유지된다. 동일하게, key를 활용한 접근을 목적으로 고안되었기 때문에, \textbf{둘 이상의 key를 허용하지 않는다.} 또, \texttt{unordered\_map}의 iterator는 key와 value를 \texttt{std::pair}로 묶은 변수를 가리킨다. 즉, \texttt{first}와 \texttt{second}로 접근해야 한다. \url{https://en.cppreference.com/w/cpp/container/unordered\_map}에 가면 어떤 함수를 지원하고 어떻게 사용하는지, 시간복잡도까지 모두 확인할 수 있다. 다음은 대표적으로 사용되는 함수들이다.
+
+\begin{itemize}
+    \item \texttt{begin()}를 통해 제일 앞의 노드를 가리키는 포인터를 참조할 수 있다.
+    \item \texttt{end()}를 통해 제일 뒤의 노드의 \textbf{다음 노드}를 가리키는 포인터를 참조할 수 있다.
+    \item \texttt{insert(\{key, T\})}를 통해 (키, 데이터) 쌍을 추가할 수 있다.
+    \item \texttt{erase(key)}를 통해 주어진 키에 해당하는 노드를 제거할 수 있다.
+    \item \texttt{erase(iterator)}를 통해 포인터(iterator)가 가리키는 노드를 제거할 수 있다.
+    \item \texttt{count(T)}를 통해 주어진 키에 해당하는 데이터의 개수를 셀 수 있다. \texttt{unordered\_map}에서는 당연히 $0$ 또는 $1$이다.
+    \item \texttt{find(T)}를 통해 주어진 키에 해당하는 데이터의 존재 여부를 판단할 수 있다. 반환형은 \texttt{bool}형 변수이다.
+    \item \texttt{empty()}를 통해 비어있는지 여부를 확인할 수 있다.
+    \item \texttt{size()}를 통해 저장된 데이터의 개수를 확인할 수 있다.
+    \item \texttt{clear()}를 통해 모든 데이터를 지울 수 있다.
+    \item \texttt{[]}에서 대괄호 안에 key를 넣으면 접근이 가능하다. 즉, \texttt{[T]}는 \texttt{*lower\_bound(T).second}와 거의 같은 역할을 수행한다.
+\end{itemize}
+
+참고로, 같은 수의 추가를 고려하고 싶다면, \texttt{unordered\_map} 대신에 \texttt{unordered\_multimap}을 사용하면 된다. 단, \texttt{unordered\_multimap}에서는 \texttt{[]}를 활용한 접근이 불가능하다. 나머지 주요 함수의 사용법은 동일하다.
+
+맵도 정의 방식에 대해서 알 필요가 있다. \texttt{unordered\_map<key, T, Hash, ...>}로 정의하는데, 각각은 다음을 나타낸다:
+
+\begin{itemize}
+    \item \texttt{key}: 키의 자료형이다.
+    \item \texttt{T}: 데이터의 자료형이다.
+    \item \texttt{Hash}: 키에 대한 해시 함수이다. STL에서 지원하는 해시 함수가 존재하는 경우 자동으로 지정된다. 직접 해시 함수를 만들어야 할 경우, \url{https://en.cppreference.com/w/cpp/utility/hash}의 예시를 참고하라.
+    \item \texttt{...}: 뒤의 추가 인자는 몰라도 된다.
+\end{itemize}
+
+정의 방식은 \texttt{unordered\_multimap}에서도 같다.
+
+이제 해시를 사용해서 이전 장에서 이진 탐색 트리로 해결했었던 \Cref{ex: set-map}를 해결해보자. 관찰을 다시 적어보면 다음과 같다.
+
+\begin{obs}
+    누적 합을 $S_i$라 하였을 때, 결국 $S_j - S_{i-1} = K$인 $(i, j)$의 쌍을 세는 문제와 같다. 따라서, 각 $i$에 대해 $S_0 = 0, S_1, \cdots, S_{i-1}$ 중에서 $S_i - K$의 개수를 세는 문제와 같다.
+\end{obs}
+
+맵 대신에, 해시맵(\texttt{unordered\_map})을 사용하여, 해시맵에 키 $S_k$에 해당하는 값을 $1$씩 추가하고, 키 $S_i - K$에 해당하는 값을 읽어 다 더하면 똑같이 문제를 해결할 수 있다. 구현은 \Cref{code: array-sum-count}에서 한 줄만 바꾸면 되므로 생략한다.
+
+\section{연습문제 A}
+\begin{problem} 
+    해시 충돌의 해결 방안을 조사해보고, C++에서 어떤 방식을 사용하고 있는지 알아보라.
+\end{problem}
+
+\section{연습문제 B}
+\begin{problem}
+    (27160번) \url{https://www.acmicpc.net/problem/27160}
+\end{problem}
+\begin{problem}
+    (9375번) \url{https://www.acmicpc.net/problem/9375}
+\end{problem}
+\begin{problem}
+    (5568번) \url{https://www.acmicpc.net/problem/5568}
+\end{problem}
+\begin{problem}
+    (9015번) \url{https://www.acmicpc.net/problem/9015}
+\end{problem}
+\begin{problem}
+    (1184번) \url{https://www.acmicpc.net/problem/1184}
+\end{problem}
+
+\begin{problem}
+    (3136번*) \url{https://www.acmicpc.net/problem/3136}
+\end{problem}
+\begin{problem}
+    (24618번*) \url{https://www.acmicpc.net/problem/24618}
+\end{problem}
+\begin{problem}
+    (27944번*) \url{https://www.acmicpc.net/problem/27944}
+\end{problem}
+\begin{problem}
+    (11510번*) \url{https://www.acmicpc.net/problem/11510}
+\end{problem}
+
+\section{연습문제 C}
+\begin{problem}
+    (8241번) \url{https://www.acmicpc.net/problem/8241}
+\end{problem}
+\begin{problem}
+    (14516번) \url{https://www.acmicpc.net/problem/14516}
+\end{problem}
+\begin{problem}
+    (28785번) \url{https://www.acmicpc.net/problem/28785}
+\end{problem}
+\begin{problem}
+    (7995번*) \url{https://www.acmicpc.net/problem/7995}
+\end{problem}

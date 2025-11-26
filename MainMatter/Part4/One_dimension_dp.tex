@@ -1,0 +1,164 @@
+동적계획법은 큰 문제를 작은 문제의 합으로 표현하여 해결하는 모든 알고리즘을 총칭한다. 작은 문제를 푸는 방식이므로 재귀함수와 유사하지만, 메모이제이션을 통해 시간복잡도를 획기적으로 단축한다는 차이점이 있다. 이번 장에서는 동적계획법 문제의 다양한 예시를 알아본다.
+
+\section{동적계획법 개론}
+
+동적계획법과 가장 비슷한 수학 개념은 점화식이다. 점화식은 수열 $\{a_n\}$에서 $a_n = a_{n-1}^2 - a_{n-2}$와 같은 식으로 수열을 정의하는 방식이다. 실제로, 동적계획법은 점화관계와 초항을 수학적으로 구하고, 점화식을 따라 수열의 $n$번째 값과 같은 원하는 값을 구해낸다.
+
+동적계획법과 점화식의 차이는 각각의 목표가 다르다는 것이다. 수학에서는 점화식을 바탕으로 일반항을 구하는 것에 주목한다. 하지만 동적계획법에서는 원하는 값만 구하면 충분하다. 물론, 일반항을 구하면 원하는 값을 쉽게 구할 수 있겠지만, PS 문제의 점화식에서 일반항이 존재하는 경우는 손에 꼽는다. 또한, 꽤 자주 $n, k$의 두 개의 변수가 포함된 수열의 점화관계가 유도되기도 하는데(2차원 동적계획법), 이 경우에는 일반항을 구하기 더욱 어려워진다.
+
+따라서 동적게획법 문제는 크게 `점화관계 파악'과, 그리고 `점화식의 계산'의 두 부분으로 나눌 수 있다. 이를 조금 더 컴퓨터과학과 어울리게 쓴다면 `재귀관계'라고 표현할 수 있다. 구현 과정에서 재귀적인 접근이 사용되기 때문이다. 예를 들어, $a_n$을 구하는 함수를 $f(n)$이라 하면, $f(n)$에서는 $f(n-1)$ 등을 호출하게 되며, $f(n)$은 재귀함수가 된다.
+
+따라서, 동적계획법의 과정을 요약하면 다음과 같다:
+\begin{enumerate}
+    \item 문제를 재귀적으로 정의한다. (`재귀관계 파악')
+    \begin{itemize}
+        \item 풀고자 하는 문제를 수학적으로 명확히 쓴다.
+        \item 부분문제를 수학적으로 정의하고,
+        \item 부분문제의 답으로 전체 문제를 해결하는 재귀적 식을 찾는다.
+    \end{itemize}
+    \item 부분문제를 재귀적 방식으로 해결하되, 답을 저장하여 중복을 방지한다. (`재귀관계의 계산')
+    \begin{itemize}
+        \item 작은 문제를 먼저 푼다.
+        \item 전부 풀릴 때까지 이를 반복한다.
+    \end{itemize}
+\end{enumerate}
+
+\section{동적계획법의 구현}
+
+이제, 구체적으로 동적계획법의 구현 방법을 알아보자. 구현 방식은 큰 수부터 재귀함수 호출로 처리하는 top-down 방식과, 작은 수부터 배열을 채워나가는 bottom-up 방식이 있다. 피보나치 수를 구하는 문제를 예시로 들어보자.
+\begin{example}
+    $F_0 = 0$, $F_1 = 1$, $F_n = F_{n-1} + F_{n-2} ~ (n \geq 2)$로 정의되는 점화식에서, $F_1$부터 $F_{30}$까지의 값을 출력하는 프로그램을 작성하라.
+\end{example}
+
+\subsection{top-down}
+먼저 top-down 방식이다. 이 경우 점화식의 변수들을 함수의 인자로 넣는다. 이 문제에서는 \texttt{int solve(int n)}으로 쓰면 충분하지만, 때로는 함수의 인자가 두 개 이상일 수도 있음에 유의하라. 이 이후에는 재귀적으로 함수를 쓰면 된다.
+
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int solve(int n) {
+    if (n == 0) return 0;
+    if (n == 1) return 1;
+    return solve(n-1) + solve(n-2);
+}
+
+int main() {
+    for (int i = 1; i <= 30; i++) cout << solve(i) << " ";
+    return 0;
+}
+\end{lstlisting}
+
+이 정도 구현은 스스로 할 수 있을 것이다. 그런데, 위 코드는 동적계획법의 중요한 원리를 누락했다. 동적계획법을 쓰면 `답을 저장하여 중복을 방지'하는 부분이 포함되어야 한다. \texttt{solve(5)}는 분명히 여러 번 호출된다. 그 때마다 다시 \texttt{solve(4)}와 \texttt{solve(3)}을 호출할 필요는 없다. 한 번 계산하면, 이후부터는 계산된 값을 반환하면 된다.
+
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int dp[31];
+int solve(int n) {
+    if (dp[n] >= 0) return dp[n];
+    if (n == 0) return dp[n] = 0;
+    if (n == 1) return dp[n] = 1;
+    return dp[n] = solve(n-1) + solve(n-2);
+}
+
+int main() {
+    for (int i = 0; i <= 30; i++) dp[i] = -1;
+    for (int i = 1; i <= 30; i++) cout << solve(i) << " ";
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{bottom-up}
+다음은 bottom-up 방식이다. 이것은 사람이 표를 채우는 방법과 유사하다. 손으로 피보나치 수를 구한다고 하면, 우리는 0번 칸과 1번 칸에 $0$과 $1$을 적고, 0번 칸과 1번 칸의 값을 더해 2번 칸에 적고, 1번 칸의 값과 2번 칸의 값을 더해 3번 칸에 적고, 이 과정을 계속 반복할 것이다. 이것을 그대로 코드로 구현하면 된다.
+
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int dp[31];
+
+int main() {
+    dp[0] = 0; dp[1] = 1;
+    for (int i = 2; i <= 30; i++) dp[i] = dp[i-1] + dp[i-2];
+    for (int i = 1; i <= 30; i++) cout << dp[i] << " ";
+    return 0;
+}
+\end{lstlisting}
+
+bottom-up 방식은 배열을 채우는 순서가 중요하다. 당연히, 8번째 줄에서 \texttt{i}를 $30$부터 시작해 점점 줄여나가면 제대로 된 답을 구할 수 없다. 아직 $28$번째와 $29$번째 값이 구해지지 않았기 때문이다. 즉, 배열을 채우는 순서를 잘 모르겠다면 top-down 방식을 사용해야 한다. 물론 top-down 방식에도 단점이 있다. 코드가 길고, 함수 호출이 많아서 bottom-up 방식보다 느릴 수 있다.
+
+\section{일차원 동적계획법 문제의 풀이}
+
+다양하고 대표적인 일차원 동적계획법 문제들의 예시를 들고 이를 푸는 방법을 소개할 것이다. 독자들은 알려주는 문제 해결 프로세스를 숙지하고 자연스러워 질 때까지 연습문제를 풀어보며 연습해야 한다.
+
+\begin{example}
+    연속한 두 개 이상의 $1$을 포함하지 않고 $0$과 $1$로만 이루어진 $N$자리 문자열의 개수를 구하는 프로그램을 작성하라.
+\end{example}
+
+
+
+\begin{example}
+    길이 $N$의 수열 $A_1, A_2, \cdots, A_N$에서 $A_i + A_{i+1} + \cdots + A_{j}~(1 \leq i \leq j \leq N)$의 가능한 최댓값을 구하는 프로그램을 작성하라.
+\end{example}
+
+\begin{example}
+    (역추적) 길이 $N$의 수열 $A_1, A_2, \cdots, A_N$에서, $A_{p_1} < A_{p_2} < \cdots < A_{p_k}$를 만족하는 가장 긴 증가수열 $p_1 < p_2 < \cdots < p_k$를 LIS(longest incresing subsequences)라고 한다. LIS를 구하는 프로그램을 작성하라.
+\end{example}
+
+\begin{example}
+    (트리 dp로 넘겨야 하는데) 트리 그래프 $G=(V, E)$가 주어질 때, $V^\prime \subseteq V$이면서 $V^\prime$에 속하는 임의의 다른 두 정점이 간선으로 연결되어 있지 않은 $V^\prime$들을 생각하자. $V^\prime$의 크기로 가능한 최댓값을 구하는 프로그램을 작성하라.
+\end{example}
+
+\begin{example}
+    (이차원 동적계획법) 문자열 $S$에 삭제, 삽입, 교환을 최소로 사용하여 $T$로 만드려고 할 때, 필요한 횟수의 최솟값을 구하는 프로그램을 작성하라.
+\end{example}
+
+\begin{example}
+    (이차원 동적계획법) 양수로 이루어진 집합 $S$가 주어질 때, $T \subseteq S$이며 $T$에 속하는 모든 원소의 합이 $k$가 되는 경우가 있는지 판단하는 프로그램을 작성하라.
+\end{example}
+
+\begin{example}
+    (부분합 최적화) BST를 만들되, 각 key의 탐색 빈도를 바탕으로 연산 횟수가 최소가 되도록 정점들을 배치하라. 단, 연산 횟수는 각 key의 깊이와 같다.
+\end{example}
+
+\begin{example}
+    배낭 문제
+\end{example}
+
+\begin{example}
+    (이차원 동적계획법) 행렬 곱에 필요한 연산량은 곱셈 순서에 따라 달라진다. 행렬의 크기가 주어질 때, 필요한 연산량의 최솟값을 출력하라.
+\end{example}
+
+\begin{example}
+    (스위핑) $N$개의 구간과 각 구간의 가중치가 주어질 때, 겹치지 않게 구간들을 뽑으면서 뽑힌 구간들의 가중치의 합이 최대가 되도록 하고 싶다. 가능한 최댓값을 출력하라.
+\end{example}
+
+\begin{example}
+    (이차원 동적계획법) 선형 회귀는 오차가 최소가 되도록 하는 하나의 선을 찾는 방식이지만, 때로는 여러 개의 선을 찾는 것이 도움이 될 수 있다. 다중 선분 선형 회귀 최적화는, $L$개의 선분으로 구성된 연속함수로 주어진 데이터를 회귀하는 방식이다. 고정된 상수 $c$에 대해서, 최소제곱법에 따른 오차의 합 $E$와 사용하는 선분의 개수 $L$로 계산한 실질적 오차 $E + c \cdot L$의 값의 최솟값을 출력하라.
+\end{example}
+
+
+\section{연습문제 A}
+\begin{problem}
+    만약 가중치가 음수일 수 있다면 최단거리가 항상 존재하는가? 이에 대해 논의하라.
+\end{problem}
+\begin{problem}
+    \Cref{code: Dijkstra-naive}와 \Cref{code: Dijkstra-heap}에서 최단거리를 역추적하는 코드를 작성하라.
+\end{problem}
+\begin{problem}
+    두 번쨰 최단거리를 구하는 $O(M \log M)$ 코드를 작성하라. 일반적으로 $K$번째 최단거리를 알아야 한다면 어떻게 구현해야 하는가? 시간복잡도는 어떻게 되는가?
+\end{problem}
+
+\section{연습문제 B}
+
+\begin{problem} \url{https://www.acmicpc.net/problem/2765} \end{problem}
+
+\begin{problem}
+    (15078번*) $n \times m$ 보드에서 노노그램을 푸는 코드를 작성하라. 칠해야 한다면 \texttt{X}, 칠하지 않아야 한다면 \texttt{.}, 알 수 없다면 \texttt{?}로 출력하면 된다. $n$과 $m$은 모두 $100$ 이하의 자연수이다. [이차원 dp]
+\end{problem}
+
+\section{연습문제 C}
+
+\begin{problem} \url{https://www.acmicpc.net/problem/2765} \end{problem}

@@ -70,32 +70,97 @@ int main() {
     \Cref{code: value-compression}에서 다시 원래 배열의 값을 알고 싶다면 어떻게 하면 되겠는가?
 \end{problem}
 
+\begin{problem}
+    (18870번) 주어진 길이 $N$의 수열에 좌표압축을 한 결과를 출력하라. 시작은 $0$번이며, $N \leq 10^6$, 수열의 값은 절댓값이 $10^9$ 이하인 정수이다.
+\end{problem}
+
+\begin{problem}
+    (18869번) 길이 $N$인 $M$개의 수열이 주어질 때, $\binom{M}{2}$개의 쌍들 중 다음 조건을 만족하는 조합의 개수를 출력하라.
+    \begin{itemize}
+        \item 수열 $A_1, A_2, \cdots, A_N$과 $B_1, B_2, \cdots, B_N$이 임의의 $1 \leq i, j \leq N$에 대하여 
+        \begin{align*}
+            A_i < A_j &\Rightarrow B_i < B_j \\
+            A_i = A_j &\Rightarrow B_i = B_j \\
+            A_i > A_j &\Rightarrow B_i > B_j
+        \end{align*}
+        를 만족해야 한다.
+    \end{itemize}
+    $2 \leq M \leq 100$, $3 \leq N \leq 10,000$이며 수열의 값은 $10^6$ 이하의 자연수이다.
+\end{problem}
+
 \section{연습문제 B}
 
-\subsection{기초문제}
-\begin{problem} \url{https://www.acmicpc.net/problem/6326} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/11540} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/18869} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/18870} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/24035} \end{problem}
+\begin{problem}
+    (2370번) $n$개의 구간 $[s_i, e_i]$가 주어지면 작은 $i$부터 $i$번 구간 $[s_i, e_i]$을 $i$번 색으로 칠하자. 이미 색이 칠해져 있다면 새로운 색으로 덮어서 칠하는 것이다. $n$번 색까지 칠한 이후에 보이는 색의 종류의 수를 출력하라. $1 \leq n \leq 10^4$, $1 \leq s_i \leq e_i \leq 10^8$이다.
+\end{problem}
 
-\subsection{응용문제}
-\begin{problem} \url{https://www.acmicpc.net/problem/2370} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/5926} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/11997} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/16806} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/18205} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/18707} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/20440} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/24572} \end{problem}
+\begin{problem} 
+    (5926번) 수직선 상의 $n$개의 점이 있고, 각 점에는 숫자가 적혀 있다. 다음 조건을 만족하도록 만들 수 있는 구간 $[s, e]$를 생각하자.
+    \begin{itemize}
+        \item 임의의 숫자 $k$에 대해 $n$개의 점들 중 $k$가 적힌 점이 존재한다면, $[s, e]$에 $k$에 적힌 점이 존재해야 한다.
+    \end{itemize}
+    가능한 $e - s$의 최솟값을 출력하라. $1 \leq n \leq 5 \times 10^4$이고 점의 좌표와 점에 적힌 숫자는 모두 $10^9$ 이하의 양의 정수이다.
+\end{problem}
 
-\subsection{도전문제}
-\begin{problem} \url{https://www.acmicpc.net/problem/2361} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/2619} \end{problem} 
-\begin{problem} \url{https://www.acmicpc.net/problem/3324} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/5584} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/11711} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/13135} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/22020} \end{problem}
-\begin{problem} \url{https://www.acmicpc.net/problem/22463} \end{problem}
+\begin{problem}
+    (11540번) $N$개의 문제 중 플레이어 A가 풀 수 있는 $A$개의 문제 번호와 플레이어 B가 풀 수 있는 $B$개의 문제 번호가 주어진다. 그들은 $1$번 문제부터 포면서 두 플레이어 중 한 명 이상이 풀 수 있다면 풀 것이다. 이때 문제를 풀 사람이 컴퓨터를 사용해야 한다. 이렇게 하여 최대한 많은 문제를 풀 때 컴퓨터를 사용하는 사람을 교체해야 하는 횟수를 출력하라. 처음 컴퓨터를 사용할 사람은 자유롭게 정할 수 있다. $1 \leq N \leq 10^9$, $1 \leq A, B \leq 5 \times 10^4$이다.
+\end{problem}
+
+\begin{problem}
+    (11997번) 이차원 좌표평면에 $n$개의 점이 있다. 이 좌표평면을 짝수 $a, b$에 대해 $x=a$와 $y=b$로 네 부분으로 나누었을 때, 네 부분에 있는 점의 개수의 최댓값의 가능한 최솟값을 출력하라. $1 \leq n \leq 1000$이고 점의 $x$좌표와 $y$좌표는 모두 $10^6$ 이하의 양의 홀수이다.
+\end{problem}
+
+\begin{problem}
+    (16806번) 좌표평면에 $n$개의 점이 있고, 각 점은 상하좌우 중 하나의 \textit{고유 방향}을 가진다. 이제 좌표평면 상의 원하는 위치에 상하좌우 중 한 방향으로 공을 굴리자. 그러면, 공이 점을 지나는 순간 공의 방향은 지난 점의 \textit{고유 방향}으로 바뀌고, 점은 사라진다. 이렇게 계속 운동하면 공이 유한 개의 점만 지남을 보장할 수 있고, 지난 점의 개수가 점수가 된다. 점수가 최대가 되도록 공의 위치와 이동 방향을 잘 정할 때, 가능한 최대 점수를 출력하라. $1 \leq n \leq 3000$이고 점의 $x$좌표와 $y$좌표는 모두 절댓값이 $10^9$ 이하인 정수이다.
+\end{problem}
+
+\begin{problem}
+    (18205번) \textbf{소숫점 $6$ 자리}로 주어지는 $n$개의 수와 $m$개의 쿼리가 있다. 쿼리의 내용은 다음과 같다:
+    \begin{itemize}
+        \item $1 \leq l \leq r \leq n$이 주어질 때, $x = A_i$인 $l \leq i \leq r$인 $i$가 $\left\lfloor \frac{r-l+1}{2} \right\rfloor + 1$개 이상(과반)인 $x$가 존재하는지 판별하라.
+    \end{itemize}
+    각 쿼리에 대해 쿼리가 참이면 \texttt{usable}을, 거짓이면 \texttt{unusable}을 출력하라. $1 \leq n \leq 10^4$, $1 \leq m \leq 10^4$이고 주어지는 수는 $0.000000$ 이상 $14.000000$ 이하이다.
+\end{problem}
+
+\begin{problem}
+    (18707번) 각 칸마다 숫자가 적혀있는 $N \times M$ 크기의 격자는 $K$개의 칸에는 $1$이 적혀있고 나머지 칸에는 전부 $0$이 적혀 있다. $[1, i] \times [1, j]$의 직사각형 영역(prefix sub-grid)에 적혀 있는 $1$의 개수가 홀수개인 $(i, j)~(1 \leq i \leq N, 1 \leq j \leq M)$의 개수를 구하여라. \textbf{여러 개의 테스트케이스에 대해 해결해야 함에 유의하라.} $1 \leq N, M \leq 10^9$, $0 \leq K \leq 10^3$이고, 입력으로는 $1$이 적혀 있는 칸의 좌표가 주어진다.
+\end{problem}
+
+\begin{problem} 
+    (20440번) $n$개의 구간 $[s_i, e_i)$가 주어질 때, $x \in [s_i, e_i)$인 $i$의 개수의 최댓값과, 최대가 될 때 $x$의 값의 범위를 구간 $[s, e)$으로 표현하라. 단, 둘 이상이 가능하다면, \textbf{가장 시작 좌표가 작은 구간 하나}만 출력하라. $1 \leq n \leq 10^6$, $0 \leq s_i \leq e_i \leq 2.1 \times 10^9$이다.
+\end{problem}
+
+\begin{problem}
+    (24572번) $N \times N$ 크기의 격자에 $T$개의 나무가 있다. 격자에 포함되면서 나무를 포함하지 않는 정사각형 격자의 한 변의 길이로 가능한 최댓값을 출력하라. $N \leq 5 \times 10^5$, $T \leq 100$이다.
+\end{problem}
+
+\section{연습문제 C}
+
+\begin{problem}
+    (2361번) 이차원 좌표평면에 $n$개의 점이 있다. 이 좌표평면에서 $\left\lceil \frac{n}{2} \right\rceil$개 이상(과반)의 점을 포함하는 최소 크기의 정사각형의 한 변의 길이를 찾아라. 정사각형의 경계에 있는 것도 정사각형에 포함되는 것으로 간주한다. $4 \leq n \leq 1000$이고 점의 $x$좌표와 $y$좌표는 모두 $100,015$ 이하의 \textbf{양의 실수로 소숫점 $6$자리}까지 주어질 수 있다.
+\end{problem}
+
+\begin{problem}
+    (3324번) $W \times H$ 크기의 격자에 $N$개의 칸이 흰색 또는 검은색으로 칠해져 있고, 칠해진 칸에는 숫자가 적혀 있다.
+    \begin{itemize}
+        \item 두 격자 사이의 거리를 상하좌우로 인접한 칸으로 이동할 때 필요한 이동 횟수로 정의하자. 즉, $(a, b)$ 위치와 $(c, d)$ 위치 사이의 거리는 $|a-c| + |b-d|$이다. 
+        \item 흰색 또는 검은색으로 칠해진 칸과 그 칸에 적혀 있는 숫자 $d$에 대하여 거리가 $d$ 이하인 점은 도달할 수 있다.
+    \end{itemize}
+    각 칸에 도달할 수 있는 흰색 칸의 수가 검은색 칸의 수보다 많은 칸의 개수와, 검은색 칸의 수가 흰색 칸의 수보다 많은 칸의 개수를 순서대로 출력하라. $1 \leq W, H \leq 10^9$, $1 \leq N \leq 3000$이고 각 칠해진 칸에 적혀 있는 수 $d$는 $0 \leq d < 5 \times 10^8$이다.
+\end{problem}
+
+\begin{problem}
+    다음과 같은 방식으로 진행되는 투표가 있다:
+    \begin{itemize}
+        \item 후보는 두 명이어야만 한다. 선착순으로(?!) 두 명만 받는다.
+        \item 각 유권자는 최대 $100,000$개의 표를 두 후보에게 나누어 던질 수 있다. 이때 한 표도 행사하지 않는 것은 불가능하다. 즉, 1번 후보에게 $a~(\geq 0)$개의 표를, 2번 후보에게 $b~(\geq 0)$개의 표를 던졌다면 $1 \leq a+b \leq 100,000$이어야 한다.
+        \item 두 후보가 받은 표의 합이 더 큰 후보가 당선된다. 만약 같다면 두 후보를 공동 당선(?!) 처리한다.
+    \end{itemize}
+    여론조사에서는 2번 후보가 압도적 지지를 받았지만, 암흑의 단체에서 해킹을 통해 다음과 같은 방식의 로직을 추가하여 1번 후보만 당선되도록 조작하였다.
+    \begin{itemize}
+        \item 투표 결과의 전산 집계에서, 한 후보에게 $x$표 이상을 투표했거나, 전체 $y$표 이상을 투표한 경우 무시한다. 다른 말로, $a \geq x$, 또는 $b \geq x$, 또는 $a+b \geq y$인 표는 무시한다.
+    \end{itemize}
+    여러분은 공직선거법 위반 혐의로 암흑의 단체를 기소하기 위해 $1 \leq x, y \leq 10^5$를 만족하는 모든 $(x, y)$ 쌍을 찾아 검토해야 한다. $n$명의 유권자가 1번 후보와 2번 후보에게 던진 표의 수가 주어질 때, 가능한 $(x, y)$ 쌍의 경우의 수를 구하는 프로그램을 작성하라. $1 \leq n \leq 1000$이다.
+\end{problem}
+
 \begin{problem} \url{https://www.acmicpc.net/problem/28461} \end{problem}

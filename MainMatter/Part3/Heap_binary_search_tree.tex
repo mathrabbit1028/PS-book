@@ -1,0 +1,431 @@
+힙과 이진 탐색 트리는 이진 트리 기반의 자료 구조로 데이터의 값과 관련된 특별한 작업을 로그 시간에 시행하는 연산을 지원하는 자료구조이다. 힙은 최대 또는 최소와 관련하여, 이진 탐색 트리는 정렬된 상태와 관련하여 연산을 지원한다. 이번 장에서는 힙과 이진 탐색 트리의 장점과 특징을 알아보고, 각각이 어떤 문제에 적합한지 알아볼 것이다.
+
+\section{힙}
+힙(heap)은 이진 트리 기반의 자료구조로, 대기열에서 \textbf{최댓값부터} 뽑는 자료구조로 고안된 것이다. 즉, 큐와 비슷하게 대기열의 추가가 가능하지만 \textbf{최댓값 참조 및 최댓값 제거}를 지원한다.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+        \draw[line width=0.5mm] (0,0) circle[radius=2cm];
+        \node[font=\large] at (0.3,0.2) {0};
+        \node[font=\large] at (1.1,-0.6) {1};
+        \node[font=\large] at (-0.5,1.2) {2};
+        \node[font=\large] at (-0.9,-0.0) {3};
+        \node[font=\large] at (0.0,-1.2) {4};
+        \draw[red,line width=0.5mm] (0.0,-1.2) circle[radius=0.4cm];
+        \draw[->, line width=0.5mm] (0.0,-2.8) -- (0.0,-1.8);
+        \node[font=\large] at (0.0,-3.2) {\texttt{top}(최대)};
+
+        \draw[->, red, line width=0.5mm] (2.1,2.1) arc[start angle=0, end angle=-90, radius=1cm];
+        \node[red, font=\large] at (2.1,2.4) {\texttt{push}};
+        \draw[->, blue, line width=0.5mm] (0.3,-1.2) arc[start angle=90, end angle=0, radius=1cm];
+        \node[blue, font=\large] at (1.3,-2.5) {\texttt{pop}};
+    \end{tikzpicture}
+\end{figure}
+
+즉, 힙에서는 최대인 데이터가 굉장히 중요하다. 그래서 최대인 데이터를 \texttt{top}이라고 한다. \texttt{top}이라는 용어를 이용해서 다시 표현하면, 힙은 \texttt{top}의 값 가져오기, 새로운 데이터 추가하고 \texttt{top}(최댓값) 다시 찾기, \texttt{top} 제거하기의 세 가지 연산이 가능하다고 말할 수 있겠다. 그리고 이 모든 연산은 $O(\log N)$의 시간에 가능하다.
+
+힙의 이러한 특징은 \textbf{최대인 것을 먼저 처리}해야만 하는 모든 문제에 적용될 수 있다. 중요도가 높은 것부터 먼저 처리하는 우선순위 기반 대기열이나 다익스트라 알고리즘(링크) 등에서 사용된다. 
+
+중요한 점은 여기서의 `최대'는 값의 최대에 한정되지 않는다. \textbf{비교 연산자가 잘 정의되어 있다면 어떤 데이터에서나 사용할 수 있다.} 구현에서 값을 직접 참조하지 않고 임의의 두 값 사이의 비교 결과만이 사용되기 때문이다. 예를 들어, 문자열의 사전순 비교에서 사전순으로 늦은 문자열이 '더 큰 것으로 \textbf{정의}'하여 힙을 만들면, 가장 사전순으로 늦은 문자열이 \texttt{top}에 위치하게 된다. 이 경우에는 문자열의 비교가 $O(1)$이 아니므로, 문자열의 비교에 걸리는 시간에 \textbf{$O(\log N)$이 곱해진 것}이 연산의 시간복잡도가 될 것임에 유의하라.
+
+STL은 `우선순위 큐'라는 이름으로 힙 자료구조를 지원한다. \url{https://en.cppreference.com/w/cpp/container/priority_queue}에 가면 어떤 함수를 지원하고 어떻게 사용하는지, 시간복잡도까지 모두 확인할 수 있다. 다음은 대표적으로 사용되는 함수들이다.
+
+\begin{itemize}
+    \item \texttt{top()}를 통해 \textbf{최댓값}을 참조할 수 있다.
+    \item \texttt{push(T)}를 통해 값을 추가할 수 있다. 값 추가 이후 \textbf{최댓값}은 바로 계산된다.
+    \item \texttt{pop()}를 통해 \textbf{최댓값}을 제거할 수 있다.
+    \item \texttt{empty()}를 통해 비어있는지 여부를 확인할 수 있다.
+    \item \texttt{size()}를 통해 저장된 데이터의 개수를 확인할 수 있다.
+\end{itemize}
+
+또한, 정의 방식에 대해서도 알 필요가 있다. \texttt{priority\_queue<T, Container, Compare>}로 정의하는데, 각각은 다음을 나타낸다:
+
+\begin{itemize}
+    \item \texttt{T}: 데이터의 자료형이다.
+    \item \texttt{Container}: 데이터를 저장할 선형 자료구조이다. 내부의 알고리즘이 $O(\log N)$에 작동하도록 보장하는 것일 뿐 메모리 구조 자체가 다른 것이 아니기 때문에 필요하다. 모든 경우에 기본값인 \texttt{vector}를 사용하면 된다.
+    \item \texttt{Compare}: 비교 기준으로, 다양한 방법이 있으나, 연산만을 담은 구조체를 선언하여 사용하는 방법이 가장 간단하다.
+\end{itemize}
+
+특별히, 가장 작은 수를 `더 큰 것으로 \textbf{정의}'하여 \textbf{최솟값}이 \texttt{top}에 위치하는 힙을 만드는 것은 STL에서 지원하는 \texttt{Compare} 객체로 해결할 수 있다:
+
+\begin{lstlisting}
+// 1) using STL
+std::priority_queue<int, std::vector<int>, std::greater<int>> min_priority_queue;
+
+// 2) using compare struct
+struct customLess {
+    bool operator()(const int l, const int r) const { return l > r; }
+};
+std::priority_queue<int, std::vector<int>, customLess> custom_priority_queue;
+\end{lstlisting}
+
+실제로 STL의 우선순위 큐를 사용하여 다음의 대표적인 힙 활용 문제를 해결해보자.
+
+\begin{example} \label{ex: heap}
+    (1715번) $N$개의 수에서 수가 하나 남을 때까지 다음 과정을 반복하자.
+    \begin{enumerate}
+        \item 원하는 두 개의 수를 뽑는다.
+        \item 두 수의 합을 기록한다.
+        \item 뽑힌 두 개의 수를 제거하고, 두 수를 더한 값을 추가한다.
+    \end{enumerate}
+    기록된 모든 수의 합으로 가능한 최솟값을 출력하라.
+\end{example}
+
+이 문제는 왜 힙으로 해결할 수 있을까? 다음의 관찰을 생각해보자.
+
+\begin{obs}
+    필요한 연산의 총 횟수는 같고, 기록된 수는 추가되는 수와 같다. 즉, 추가되는 수의 합이 최대한 작을수록 유리하다. 따라서 남아있는 수 중 가장 작은 두 수를 뽑는 것이 최적이다(\Cref{pb: add-number-proof}). 크기 순으로 최소 또는 최대인 수를 뽑고, 그 합을 삽입하는 연산을 빠르게 수행해야 하므로, 힙은 이 문제에 적합한 자료구조이다.
+\end{obs}
+
+이제 관찰을 바탕으로 실제로 구현을 해보자. \Cref{code: add-number}을 보자.
+
+\begin{code} \label{code: add-number}
+\Cref{ex: heap}을 해결하는 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, sum = 0;
+priority_queue< int, vector<int>, greater<int> > pq;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        int a;
+        cin >> a;
+        pq.push(a);
+    }
+    
+    while (pq.size() > 1) {
+        int a = pq.top(); pq.pop();
+        int b = pq.top(); pq.pop();
+        sum += a+b;
+        pq.push(a+b);
+    }
+    
+    cout << sum << "\n";
+}
+\end{lstlisting}
+\end{code}
+
+\section{이진 탐색 트리}
+이진 탐색 트리(binary search tree)은 이름에서도 드러나지만 이진 트리이지만 탐색을 위해 설계된 이진 트리이다. 여기서의 탐색은 크기 순으로 정렬된 것을 나타내는데, 실제로 데이터의 추가 및 삭제가 계속 일어나는 상황에서도 데이터를 \textbf{정렬된 상태로 유지}하는 중요한 성질이 있다.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}
+        \draw[step=1cm,black] (-3, 0) grid (3, 1);
+        \node[font=\large] at (-2.5,0.5) {0};
+        \node[font=\large] at (-1.5,0.5) {1};
+        \node[font=\large] at (-0.5,0.5) {2};
+        \node[font=\large] at (0.5,0.5) {3};
+        \node[font=\large] at (1.5,0.5) {4};
+        \node[font=\large] at (2.5,0.5) {5};
+        \node[font=\large] at (0.0, -0.5) {정렬된 상태};
+
+        \draw[->, line width=0.5mm] (0.0,-1.0) -- (0.0,-2.5);
+        \node[font=\large] at (1.0, -1.75) {3의 제거};
+
+        \draw[step=1cm,black] (-3, -4) grid (3, -3);
+        \node[font=\large] at (-2.5,-3.5) {0};
+        \node[font=\large] at (-1.5,-3.5) {1};
+        \node[font=\large] at (-0.5,-3.5) {2};
+        \node[font=\large] at (0.5,-3.5) {4};
+        \node[font=\large] at (1.5,-3.5) {5};
+        \node[font=\large] at (0.0, -4.5) {\textbf{여전히} 정렬된 상태};
+    \end{tikzpicture}
+\end{figure}
+
+이진 탐색 트리의 이러한 특징은 변화하는 배열에서 \textbf{정렬된 상태를 유지}해야만 하는 모든 문제에 적용될 수 있다. 또한, 레드-블랙 트리, AVL 트리 등의 방식으로 이진 탐색 트리의 각 연산은 $O(\log N)$의 시간에 작동한다. 누군가는 힙의 모든 연산을 이진 탐색 트리가 지원하니까 힙의 필요성이 없다고 생각할 수 있다. 하지만 스택 및 큐와 덱의 관계와 비슷하게, 이진 탐색 트리의 연산 시간복잡도는 $O(\log N)$이지만 \textbf{상수가 꽤 크다}는 것이 문제가 된다. 다른 말로 $O(N \log N)$의 알고리즘이라도 이진 탐색 트리를 사용한다면 $N \log N < 10^8$의 제약조건에서도 몇 초의 시간이 걸릴 수 있다. 즉, 힙의 기능이 문제 해결에 충분한 경우에는 이진 탐색 트리 대신 힙을 사용하는 것이 훨씬 좋다.
+
+STL은 이진 탐색 트리를 두 가지 형태로 지원한다. 첫번째는 정렬된 형태의 집합으로, \texttt{set}이라고 한다. 집합이므로 \textbf{같은 수의 추가는 무시}된다. \url{https://en.cppreference.com/w/cpp/container/set}에 가면 어떤 함수를 지원하고 어떻게 사용하는지, 시간복잡도까지 모두 확인할 수 있다. 다음은 대표적으로 사용되는 함수들이다.
+
+\begin{itemize}
+    \item \texttt{begin()}를 통해 제일 앞의 노드를 가리키는 포인터를 참조할 수 있다.
+    \item \texttt{end()}를 통해 제일 뒤의 노드의 \textbf{다음 노드}를 가리키는 포인터를 참조할 수 있다.
+    \item \texttt{insert(T)}를 통해 데이터를 추가할 수 있다. 즉시 정렬된다.
+    \item \texttt{erase(T)}를 통해 주어진 값에 해당하는 노드를 제거할 수 있다.
+    \item \texttt{erase(iterator)}를 통해 포인터(iterator)가 가리키는 노드를 제거할 수 있다.
+    \item \texttt{count(T)}를 통해 주어진 데이터의 개수를 셀 수 있다. \texttt{set}에서는 당연히 $0$ 또는 $1$이다.
+    \item \texttt{find(T)}를 통해 주어진 데이터의 존재 여부를 판단할 수 있다. 반환형은 \texttt{bool}형 변수이다.
+    \item \texttt{lower\_bound(T)}를 통해 주어진 데이터 \textbf{이상}인 최솟값을 가리키는 포인터를 얻을 수 있다. 이 연산도 $O(\log N)$에 실행된다.
+    \item \texttt{upper\_bound(T)}를 통해 주어진 데이터 \textbf{초과}인 최솟값을 가리키는 포인터를 얻을 수 있다. 이 연산도 $O(\log N)$에 실행된다.
+    \item \texttt{empty()}를 통해 비어있는지 여부를 확인할 수 있다.
+    \item \texttt{size()}를 통해 저장된 데이터의 개수를 확인할 수 있다.
+    \item \texttt{clear()}를 통해 모든 데이터를 지울 수 있다.
+\end{itemize}
+
+참고로, \texttt{[]}를 통해 \textbf{랜덤 엑세스가 불가능}하다. 또, 같은 수의 추가를 고려하고 싶다면, \texttt{set} 대신에 \texttt{multiset}을 사용하면 된다. \texttt{erase(T)}에서 주어진 값에 해당하는 노드가 \textbf{모두 제거된다}는 사실을 제외하면 주요 함수의 사용법은 동일하다.
+
+우선순위 큐와 마찬가지로 정의 방식에 대해서도 알 필요가 있다. \texttt{set<T, Compare, Allocator>}로 정의하는데, 각각은 다음을 나타낸다:
+
+\begin{itemize}
+    \item \texttt{T}: 데이터의 자료형이다.
+    \item \texttt{Compare}: 비교 기준으로, 우선순위 큐와 같다.
+    \item \texttt{Allocator}: 몰라도 된다.
+\end{itemize}
+
+정의 방식은 \texttt{multiset}에서도 같다.
+
+두 번째는, \texttt{map}이라고 불리는 자료구조로 딕셔너리와 똑같다. key-value 쌍으로 값이 저장되고, key가 정렬된 순서로 유지된다. 특이하게도, \texttt{map}은 key를 활용한 접근을 목적으로 고안되었기 때문에, \textbf{둘 이상의 key를 허용하지 않는다.} 또, \texttt{map}의 iterator는 key와 value를 \texttt{std::pair}로 묶은 변수를 가리킨다. 즉, \texttt{first}와 \texttt{second}로 접근해야 한다. \url{https://en.cppreference.com/w/cpp/container/map}에 가면 어떤 함수를 지원하고 어떻게 사용하는지, 시간복잡도까지 모두 확인할 수 있다. 다음은 대표적으로 사용되는 함수들이다.
+
+\begin{itemize}
+    \item \texttt{begin()}를 통해 제일 앞의 노드를 가리키는 포인터를 참조할 수 있다.
+    \item \texttt{end()}를 통해 제일 뒤의 노드의 \textbf{다음 노드}를 가리키는 포인터를 참조할 수 있다.
+    \item \texttt{insert(\{key, T\})}를 통해 (키, 데이터) 쌍을 추가할 수 있다. 즉시 정렬된다.
+    \item \texttt{erase(key)}를 통해 주어진 키에 해당하는 노드를 제거할 수 있다.
+    \item \texttt{erase(iterator)}를 통해 포인터(iterator)가 가리키는 노드를 제거할 수 있다.
+    \item \texttt{count(T)}를 통해 주어진 키에 해당하는 데이터의 개수를 셀 수 있다. \texttt{map}에서는 당연히 $0$ 또는 $1$이다.
+    \item \texttt{find(T)}를 통해 주어진 키에 해당하는 데이터의 존재 여부를 판단할 수 있다. 반환형은 \texttt{bool}형 변수이다.
+    \item \texttt{lower\_bound(T)}를 통해 주어진 키 \textbf{이상}인 최소의 키를 가리키는 포인터를 얻을 수 있다. 이 연산도 $O(\log N)$에 실행된다.
+    \item \texttt{upper\_bound(T)}를 통해 주어진 키 \textbf{초과}인 최소의 키를 가리키는 포인터를 얻을 수 있다. 이 연산도 $O(\log N)$에 실행된다.
+    \item \texttt{empty()}를 통해 비어있는지 여부를 확인할 수 있다.
+    \item \texttt{size()}를 통해 저장된 데이터의 개수를 확인할 수 있다.
+    \item \texttt{clear()}를 통해 모든 데이터를 지울 수 있다.
+    \item \texttt{[]}에서 대괄호 안에 key를 넣으면 접근이 가능하다. 즉, \texttt{[T]}는 \texttt{*lower\_bound(T).second}와 거의 같은 역할을 수행한다. 따라서 이 연산은 $O(\log N)$에 실행된다.
+\end{itemize}
+
+참고로, 같은 수의 추가를 고려하고 싶다면, \texttt{map} 대신에 \texttt{multimap}을 사용하면 된다. 단, \texttt{multimap}에서는 \texttt{[]}를 활용한 접근이 불가능하다. 나머지 주요 함수의 사용법은 동일하다.
+
+맵도 정의 방식에 대해서 알 필요가 있다. \texttt{set<key, T, Compare, Allocator>}로 정의하는데, 각각은 다음을 나타낸다:
+
+\begin{itemize}
+    \item \texttt{key}: 키의 자료형이다.
+    \item \texttt{T}: 데이터의 자료형이다.
+    \item \texttt{Compare}: 비교 기준으로, 우선순위 큐와 같다.
+    \item \texttt{Allocator}: 몰라도 된다.
+\end{itemize}
+
+정의 방식은 \texttt{multimap}에서도 같다.
+
+이제, 실제로 STL의 셋이나 맵을 사용하여 다음의 대표적인 이진 탐색 트리 활용 문제를 해결해보자.
+
+\begin{example} \label{ex: set-map}
+    (2015번) 길이 $N$의 수열과 수 $K$가 주어질 때, $A_i + A_{i+1} + \cdots + A_j = K$인 $(i, j)~(1 \leq i \leq j \leq N)$ 쌍의 개수를 출력하라.
+\end{example}
+
+이 문제는 왜 셋이나 맵으로 해결할 수 있을까? 다음의 관찰을 생각해보자.
+
+\begin{obs}
+    누적 합을 $S_i$라 하였을 때, 결국 $S_j - S_{i-1} = K$인 $(i, j)$의 쌍을 세는 문제와 같다. 따라서, 각 $i$에 대해 $S_0 = 0, S_1, \cdots, S_{i-1}$ 중에서 $S_i - K$의 개수를 세는 문제와 같다. 이는 삽입이 $O(N)$번 일어나는 집합에서 주어진 수의 개수를 세는 것이므로 맵은 이 문제에 적합한 자료구조이다. (그리고 (멀티)셋은 적합하지 않다)
+\end{obs}
+
+이제 관찰을 바탕으로 실제로 구현을 해보자. \Cref{code: array-sum-count}을 보자.
+
+\begin{code} \label{code: array-sum-count}
+\Cref{ex: set-map}을 해결하는 코드
+\begin{lstlisting}
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, k, arr[202020], sum[202020];
+long long ans = 0;
+map<int, int> m;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    
+    int n, k;
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) {
+        cin >> arr[i];
+        sum[i] = sum[i-1] + arr[i];
+    }
+    
+    for (int i = 1; i <= n; i++) {
+        m[sum[i-1]]++;
+        ans += m[sum[i]-k];
+    }
+    
+    cout << ans << "\n";
+    
+    return 0;
+}
+\end{lstlisting}
+\end{code}
+
+\Cref{code: array-sum-count}에서 보면, \texttt{map}의 \texttt{[]} 연산자는 존재하지 않는 key에 접근했을 때, 대입 연산을 하면 새로운 노드를 만들고 값을 참조하면 $0$을 반환하도록 깔끔하게 구현되어 있다. 이러한 특징은 코드에서의 예외 처리를 줄여 간결하게 만들어준다.
+
+\section{연습문제 A}
+\begin{problem} \label{pb: add-number-proof}
+    \Cref{ex: heap}에서 가장 작은 수를 뽑는 것이 최적임을 증명하라. (이와 같이 순간의 최적이 전체의 최적과 동일한 경우 그리디 알고리즘(링크)을 쓸 수 있다고 한다)
+\end{problem}
+\begin{problem}
+    \Cref{ex: set-map}은 멀티셋으로 해결할 수 없다. 왜 그럴까? (\textit{hint.} (멀티)셋에서는 랜덤 엑세스가 불가능함을 생각해보라.)
+\end{problem}
+
+\section{연습문제 B}
+\begin{problem}
+    (11286번) \url{https://www.acmicpc.net/problem/11286}
+\end{problem}
+\begin{problem}
+    (14425번) \url{https://www.acmicpc.net/problem/14425}
+\end{problem}
+\begin{problem}
+    (1655번) \url{https://www.acmicpc.net/problem/1655}
+\end{problem}
+\begin{problem}
+    (1202번) \url{https://www.acmicpc.net/problem/1202}
+\end{problem}
+\begin{problem}
+    (2014번) \url{https://www.acmicpc.net/problem/2014}
+\end{problem}
+\begin{problem}
+    (13334번) \url{https://www.acmicpc.net/problem/13334}
+\end{problem}
+\begin{problem}
+    (17612번) \url{https://www.acmicpc.net/problem/17612}
+\end{problem}
+\begin{problem}
+    (21939번) \url{https://www.acmicpc.net/problem/21939}
+\end{problem}
+\begin{problem}
+    (19638번) \url{https://www.acmicpc.net/problem/19638}
+\end{problem}
+
+\begin{problem}
+    (2957번*) \url{https://www.acmicpc.net/problem/2957}
+\end{problem}
+\begin{problem}
+    (1539번*) \url{https://www.acmicpc.net/problem/1539}
+\end{problem}
+\begin{problem}
+    (13303번*) \url{https://www.acmicpc.net/problem/13303}
+\end{problem}
+\begin{problem}
+    (3988번*) \url{https://www.acmicpc.net/problem/3988}
+\end{problem}
+\begin{problem}
+    (15461번*) \url{https://www.acmicpc.net/problem/15461}
+\end{problem}
+\begin{problem}
+    (21279번*) \url{https://www.acmicpc.net/problem/21279}
+\end{problem}
+\begin{problem}
+    (9571번*) \url{https://www.acmicpc.net/problem/9571}
+\end{problem}
+\begin{problem}
+    (18879번*) \url{https://www.acmicpc.net/problem/18879}
+\end{problem}
+\begin{problem}
+    (28327번*) \url{https://www.acmicpc.net/problem/28327}
+\end{problem}
+\begin{problem}
+    (15901번*) \url{https://www.acmicpc.net/problem/15901}
+\end{problem}
+\begin{problem}
+    (17163번*) \url{https://www.acmicpc.net/problem/17163}
+\end{problem}
+\begin{problem}
+    (25734번*) \url{https://www.acmicpc.net/problem/25734}
+\end{problem}
+\begin{problem}
+    (2471번*) \url{https://www.acmicpc.net/problem/2471}
+\end{problem}
+\begin{problem}
+    (10760번*) \url{https://www.acmicpc.net/problem/10760}
+\end{problem}
+\begin{problem}
+    (26970번*) \url{https://www.acmicpc.net/problem/26970}
+\end{problem}
+\begin{problem}
+    (16764번*) \url{https://www.acmicpc.net/problem/16764}
+\end{problem}
+\begin{problem}
+    (11920번*) \url{https://www.acmicpc.net/problem/11920}
+\end{problem}
+
+\section{연습문제 C}
+\begin{problem}
+    (9244번) \url{https://www.acmicpc.net/problem/9244}
+\end{problem}
+\begin{problem}
+    (20150번) \url{https://www.acmicpc.net/problem/20150}
+\end{problem}
+\begin{problem}
+    (20151번) \url{https://www.acmicpc.net/problem/20151}
+\end{problem}
+\begin{problem}
+    (32033번) \url{https://www.acmicpc.net/problem/32033}
+\end{problem}
+\begin{problem}
+    (17763번) \url{https://www.acmicpc.net/problem/17763}
+\end{problem}
+\begin{problem}
+    (9281번) \url{https://www.acmicpc.net/problem/9281}
+\end{problem}
+\begin{problem}
+    (28124번) \url{https://www.acmicpc.net/problem/28124}
+\end{problem}
+\begin{problem}
+    (6620번) \url{https://www.acmicpc.net/problem/6620}
+\end{problem}
+\begin{problem}
+    (31745번) \url{https://www.acmicpc.net/problem/31745}
+\end{problem}
+\begin{problem}
+    (3647번) \url{https://www.acmicpc.net/problem/3647}
+\end{problem}
+\begin{problem}
+    (28198번) \url{https://www.acmicpc.net/problem/28198}
+\end{problem}
+\begin{problem}
+    (19557번) \url{https://www.acmicpc.net/problem/19557}
+\end{problem}
+\begin{problem}
+    (13864번) \url{https://www.acmicpc.net/problem/13864}
+\end{problem}
+\begin{problem}
+    (32040번) \url{https://www.acmicpc.net/problem/32040}
+\end{problem}
+\begin{problem}
+    (31972번) \url{https://www.acmicpc.net/problem/31972}
+\end{problem}
+\begin{problem}
+    (28697번) \url{https://www.acmicpc.net/problem/28697}
+\end{problem}
+\begin{problem}
+    (18998번) \url{https://www.acmicpc.net/problem/18998}
+\end{problem}
+\begin{problem}
+    (13624번) \url{https://www.acmicpc.net/problem/13624}
+\end{problem}
+\begin{problem}
+    (9482번) 삼차원 좌표계 상에 $N$개의 점이 주어질 때 두 점 사이의 거리가 $K$ 이하인 두 점 쌍이 $10^5$가지를 넘지 않는다. 이러한 두 점 쌍의 개수를 출력하라. $N \leq 10^5$, $k \leq 10^9$이고 $N$개의 점의 $x, y, z$좌표는 모두 절댓값이 $10^9$ 이하인 정수이다.
+\end{problem}
+\begin{problem}
+    (13138번) \url{https://www.acmicpc.net/problem/13138}
+\end{problem}
+
+\begin{problem}
+    (14435번*) \url{https://www.acmicpc.net/problem/14435}
+\end{problem}
+\begin{problem}
+    (1250번*) \url{https://www.acmicpc.net/problem/1250}
+\end{problem}
+\begin{problem}
+    (17728번*) \url{https://www.acmicpc.net/problem/17728}
+\end{problem}
+\begin{problem}
+    (9245번*) \url{https://www.acmicpc.net/problem/9245}
+\end{problem}
+\begin{problem}
+    (23670번*) \url{https://www.acmicpc.net/problem/23670}
+\end{problem}
+\begin{problem}
+    (12009번*) \url{https://www.acmicpc.net/problem/12009}
+\end{problem}
+\begin{problem}
+    (8253번*) \url{https://www.acmicpc.net/problem/8253}
+\end{problem}
+\begin{problem}
+    (18801번**) \url{https://www.acmicpc.net/problem/18801}
+\end{problem}
+\begin{problem}
+    (4000번**) \url{https://www.acmicpc.net/problem/18801}
+\end{problem}

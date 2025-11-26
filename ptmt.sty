@@ -99,6 +99,12 @@
 % The ragged2e package provides additional options for paragraph alignment.
 \usepackage{ragged2e}
 
+% rectangular box
+\usepackage[most]{tcolorbox}
+
+% table
+\usepackage{array}
+
 % The titlesec package is used for customizing the formatting of section headings.
 
 % The \titleformat command is used to customize the format of a specific sectioning command.
@@ -222,6 +228,14 @@
   \newtheorem{problem}{\protect\problemname}[chapter]
 \fi
 
+% Hint environment
+\theoremstyle{definition}
+\ifx\thechapter\undefined
+  \newtheorem{hint}{\protect\hintname}
+\else
+  \newtheorem{hint}{\protect\hintname}[chapter]
+\fi
+
 % Remark environment
 \theoremstyle{definition}
 \newtheorem*{remark}{\protect\remarkname}
@@ -253,6 +267,9 @@
   \newtheorem{code}{\protect\codename}[chapter]
 \fi
 
+\def\thm@space@setup{\thm@preskip=10pt
+\thm@postskip=0pt}
+
 \makeatother
 
 % Custom names for theorem-like environments
@@ -268,6 +285,7 @@
 \providecommand{\lemmaname}{Lemma}
 \providecommand{\observationname}{Observation}
 \providecommand{\problemname}{Problem}
+\providecommand{\hintname}{\textit{hint}}
 \providecommand{\propositionname}{Proposition}
 \providecommand{\remarkname}{Remark}
 \providecommand{\solutionname}{Solution}

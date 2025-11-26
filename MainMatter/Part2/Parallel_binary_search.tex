@@ -66,7 +66,13 @@ int main() {
 \end{lstlisting}
 \end{code}
 
-이와 같은 병렬 이분 탐색은 쿼리가 포함된 문제에서 주로 쓰이며, 단독으로 쓰이는 경우보다 다양한 자료구조와 함께 쓰이는 경우가 많다.
+정리하면 병렬 이분 탐색은 최적해 문제 쿼리를 업데이트 쿼리와 결정 문제 쿼리로 환원하는 것이다:
+\begin{itemize}
+    \item 업데이트 쿼리: 결정 문제의 고정된 기준값 $m$이 증가할 때, 결정 문제를 빠르게 해결하기 위해 저장해야 하는 값들을 갱신
+    \item 결정 문제 쿼리: 주어진 $m$에 대해 결정 문제를 해결
+\end{itemize}
+
+이처럼 업데이트 쿼리가 추가되기 때문에 업데이트가 있는 상황에서 주어진 문제를 빠르게 해결하기 위해 사용되는 자료구조들과 함께 쓰이는 경우가 많다.
 
 \section{연습문제 A}
 \begin{problem} \label{pb: wrong-pbs-time}
@@ -129,6 +135,10 @@ int main() {
     \begin{itemize}
         \item $l, r, k$가 주어질 때 모든 $1 \leq i \leq k$에 대해 $C_i + C_{(i~\textrm{mod}~k)+1} \leq W$이면서 $A[l..r]$에서 몇 개의 수를 지워 $k$개의 수를 남긴 부분 수열인 $C_i$가 존재하는 $W$의 최솟값을 출력하라.
     \end{itemize}
+\end{problem}
+
+\begin{problem}
+    (25458번*) \url{https://www.acmicpc.net/problem/25458}
 \end{problem}
 
 \begin{problem}
